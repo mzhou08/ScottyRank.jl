@@ -1,8 +1,8 @@
 using DelimitedFiles
 using LinearAlgebra
 
-open("graphs/food.raw") do raw
-  open("graphs/food.txt", "w") do txt
+open("graphs/dining.raw") do raw
+  open("graphs/dining.txt", "w") do txt
     v, e = map(x -> convert(UInt32, x), readdlm(IOBuffer(readline(raw))))
 
     N = Array{String}(undef, v)
