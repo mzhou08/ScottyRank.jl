@@ -13,7 +13,7 @@
 - Visualize graphs for presentation
 - ~~Generate matrix base on nodes~~
 - ~~Implement damping~~
-- What's next
+- What's next?
 - Do some reading: once we have the matrix, how/what do we do with eigenstuff?
   - Apparently simply doing eigen would not work
   - Need to use damping factor since has cycles and sinkholes
