@@ -1,35 +1,40 @@
-using LinearAlgebra;
+using DelimitedFiles
+using LinearAlgebra
 
-# Struct for a graph node.
-# Index: its unique integer index, ranging from 1 to n.
-# Name: the name we assign to the node, e.g. "Wikipedia"
-# Neighbors: the nodes that this node points to.
-struct node
-  index::Int
+struct Vertex
+  index::UInt32
   name::String
-  neighbors::Vector{Int64}
+  out_neighbors::Vector{UInt32}
 end
 
-open("graphs/food.txt") do io
-  n = parse(Int, readline(io))
+n, V = open("graphs/food.txt") do txt
+  n = parse(UInt32, readline(txt))
+  V = Array{Vertex}(undef, 0)
   for i in 1:n
-    line = readline(io)
-    data = split(line, " ")
-    
-    # Initializing the neighbors array
-    neighbors = Int[]
-
-    # Constructing the list of neighbors
-    # data[i] is the name, so it is not included here
+    data = readdlm(IOBuffer(readline(txt)))
+    out_neighbors = Array{UInt32}(undef, 0)
     for j in 2:length(data)
-      push!(neighbors, parse(Int, data[j]))
+      push!(out_neighbors, convert(UInt32, data[j]))
     end
+    push!(V, Vertex(i, data[1], out_neighbors))
+  end
+  n, V
+end
 
-    # Constructing a new node struct
-    newNode = node(i,data[1], neighbors)
-
-    println(newNode.index)
-    println(newNode.name)
-    println(newNode.neighbors)
+A = zeros(Float64, (n, n))
+for i in 1:n
+  m = length(V[i].out_neighbors)
+  if m == 0
+    for j in 1:n
+      A[j, i] = 1 / (n - 1)
+    end
+    A[i, i] = 0
+  else
+    for j in V[i].out_neighbors
+      A[j, i] = 1 / m
+    end
   end
 end
+
+display(A)
+#  valA, vecA = eigen(A)

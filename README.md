@@ -1,10 +1,15 @@
 # pagerank-julia
+
 ## Term project for 21-241 Matrices and Linear Transformations
+
 ## Siyuan "Daniel" Chen, Michael Zhou
 
+### TODO
 
-### To-Do:
-<ol>
-  <li>Generate matrix base on nodes</li>
-  <li>Do some reading— Once we have the matrix, how/what do we do with eigenstuff?</li>
-</ol>
+- Add more, simpler graphs
+  - Write in raw format
+  - Translate using `generate.jl`
+- ~~Generate matrix base on nodes~~
+- Do some reading: once we have the matrix, how/what do we do with eigenstuff?
+  - Apparently simply doing eigen would not work
+  - Need to use damping factor since has cycles and sinkholes
