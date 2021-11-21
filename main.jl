@@ -10,7 +10,7 @@ struct node
   neighbors::Vector{Int64}
 end
 
-open("graphs/test.txt") do io
+open("graphs/food.txt") do io
   n = parse(Int, readline(io))
   for i in 1:n
     line = readline(io)
