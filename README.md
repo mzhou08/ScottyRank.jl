@@ -3,7 +3,7 @@
 ## Siyuan "Daniel" Chen, Michael Zhou
 
 
-###To-Do:
+### To-Do:
 <ol>
   <li>Generate matrix base on nodes</li>
   <li>Do some reading— Once we have the matrix, how/what do we do with eigenstuff?</li>
