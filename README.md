@@ -19,3 +19,6 @@
   - Need to use damping factor since has cycles and sinkholes
 - How should we present PageRank and HITS
   - Is adding HITS enough for complexity score?
+- Search for datasets
+- Optimization for sparse networks?
+- Optimization for network of networks?
