@@ -28,34 +28,27 @@ function readgraph(filename::String)
   n, V
 end
 
-n, V = readgraph("food")
-
-# PageRank
-
-M = zeros(Float64, (n, n))
-for i in 1:n
-  m = length(V[i].out_neighbors)
-  if m == 0
-    for j in 1:n
-      M[j, i] = 1 / (n - 1);
-    end
-    M[i, i] = 0
-  else
-    for j in V[i].out_neighbors
-      M[j, i] = 1 / m;
+function pagerank(n::UInt32, V::Vector{Vertex})
+  M = zeros(Float64, (n, n))
+  for i in 1:n
+    m = length(V[i].out_neighbors)
+    if m == 0
+      for j in 1:n
+        M[j, i] = 1 / (n - 1);
+      end
+      M[i, i] = 0
+    else
+      for j in V[i].out_neighbors
+        M[j, i] = 1 / m;
+      end
     end
   end
+  d = 0.85
+  map(x -> d * x + (1 - d) / n, M)
 end
 
-display(M)
-println();
-
-# damping factor
-d = 0.85
-M = map(x -> d * x + (1 - d) / n, M)
-
-display(M)
-println();
+n, V = readgraph("food")
+M = pagerank(n, V)
 
 # HITS
 
