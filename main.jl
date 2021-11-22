@@ -8,13 +8,12 @@ struct Vertex
   out_neighbors::Vector{UInt32}
 end
 
-# read graph
-
-n, V = open("graphs/food.txt") do txt
-  n = parse(UInt32, readline(txt))
+function readgraph(filename::String)
+  file = open("graphs/" * filename * ".txt")
+  n = parse(UInt32, readline(file))
   V = Array{Vertex}(undef, 0)
   for i in 1:n
-    data = readdlm(IOBuffer(readline(txt)))
+    data = readdlm(IOBuffer(readline(file)))
     in_neighbors = Array{UInt32}(undef, 0)
     out_neighbors = Array{UInt32}(undef, 0)
     for j in 2:length(data)
@@ -22,14 +21,14 @@ n, V = open("graphs/food.txt") do txt
     end
     push!(V, Vertex(i, data[1], in_neighbors, out_neighbors))
   end
+  for i in 1:n, j in V[i].out_neighbors
+    push!(V[j].in_neighbors, i)
+  end
+  close(file)
   n, V
 end
 
-for i in 1:n
-  for j in V[i].out_neighbors
-    push!(V[j].in_neighbors, i)
-  end
-end
+n, V = readgraph("food")
 
 # PageRank
 
