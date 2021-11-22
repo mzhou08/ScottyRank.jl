@@ -47,28 +47,23 @@ function pagerank(n::UInt32, V::Vector{Vertex})
   map(x -> d * x + (1 - d) / n, M)
 end
 
-n, V = readgraph("food")
-M = pagerank(n, V)
-
-# HITS
-
-A = zeros(Float64, (n, n))
-H = zeros(Float64, (n, n))
-
-for i in 1:n
-  for j in V[i].in_neighbors
-    A[i, j] = 1
+function hits(n::UInt32, V::Vector{Vertex})
+  A = zeros(Float64, (n, n))
+  H = zeros(Float64, (n, n))
+  for i in 1:n
+    for j in V[i].out_neighbors
+      A[j, i] = 1
+    end
+    for j in V[i].in_neighbors
+      H[j, i] = 1
+    end
   end
-  for j in V[i].out_neighbors
-    H[i, j] = 1
-  end
+  A, H
 end
 
-display(A)
-println()
-
-display(H)
-println()
+n, V = readgraph("food")
+M = pagerank(n, V)
+A, H = hits(n, V)
 
 a = ones(Float64, n)
 h = ones(Float64, n)
