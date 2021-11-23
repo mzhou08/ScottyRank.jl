@@ -75,8 +75,7 @@ function update(a, h) # HITS update function
   na / norm(na), nh / norm(nh)
 end
 
-function displayResults(M::Matrix{Float64}, V::Vector{Vertex}, n::UInt32) 
-
+function displayResults(M::Array{Float64, 2}, V::Vector{Vertex}, n::UInt32) 
   for i in 1:5
     M = M*M
   end
