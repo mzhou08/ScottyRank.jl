@@ -15,13 +15,7 @@ Julia implementation for PageRank and HITS
 - Visualize graphs for presentation
 - ~~Generate matrix base on nodes~~
 - ~~Implement damping~~
-- ~~Display PageRank results~~
-- What's next? - HITS
-- Do some reading: once we have the matrix, how/what do we do with eigenstuff?
-  - Apparently simply doing eigen would not work
-  - Need to use damping factor since has cycles and sinkholes
-- How should we present PageRank and HITS
-  - Is adding HITS enough for complexity score?
+- Display PageRank results - pretty print
 - Search for datasets
 - Optimization for sparse networks?
 - Optimization for network of networks?
