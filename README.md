@@ -1,17 +1,15 @@
 # ScottyRank
 
+Term project for 21-241 Matrices and Linear Transformations:
 Julia implementation for PageRank and HITS
-
-## Term project for 21-241 Matrices and Linear Transformations
 
 ## Siyuan "Daniel" Chen, Michael Zhou
 
 ### TODO
 
-- Add more, simpler graphs
-  - Write in raw format
-  - Translate using `generate.jl`
-- Need larger test sets
+- Data
+  - Add small test graphs
+  - Add large datasets
 - Visualize graphs for presentation
 - ~~Generate matrix base on nodes~~
 - ~~Implement damping~~
@@ -19,7 +17,6 @@ Julia implementation for PageRank and HITS
 - Search for datasets
 - Optimization for sparse networks?
 - Optimization for network of networks?
-- Pagerank epsilon form
 
 ### Data used
 
