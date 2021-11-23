@@ -25,6 +25,7 @@ Julia implementation for PageRank and HITS
 - Search for datasets
 - Optimization for sparse networks?
 - Optimization for network of networks?
+- Pagerank epsilon form
 
 ### Data used
 

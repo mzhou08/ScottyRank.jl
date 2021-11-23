@@ -2,7 +2,8 @@ module ScottyRank
 
 using DelimitedFiles
 
-export Vertex, Graph, read_edge_list, read_adjacency_list
+
+export Vertex, Graph
 
 struct Vertex
   index::UInt32
@@ -13,6 +14,19 @@ end
 struct Graph
   num_vertices::UInt32
   vertices::Vector{Vertex}
+end
+
+
+export read_graph
+
+function read_graph(filepath::String, filetype::String="el")
+  if filetype == "el"
+    read_edge_list(filepath)
+  elseif filetype == "al"
+    read_adjacency_list(filepath)
+  else
+    error("invalid filetype")
+  end
 end
 
 function read_edge_list(filepath::String)
@@ -28,7 +42,7 @@ function read_edge_list(filepath::String)
     push!(vertices[index_to].in_neighbors, index_from)
   end
   close(file)
-  vertices
+  Graph(num_vertices, vertices)
 end
 
 function read_adjacency_list(filepath::String)
@@ -43,7 +57,53 @@ function read_adjacency_list(filepath::String)
     push!(vertices[index_to].in_neighbors, index_from)
   end
   close(file)
-  vertices
+  Graph(num_vertices, vertices)
+end
+
+
+export pagerank
+
+function pagerank(graph::Graph; damping::Float64=0.85, modeparam::Tuple{String, Union{UInt32, Float64}}=("iter", UInt32(10)))
+  if damping < 0 || damping > 1
+    error("invalid damping")
+  end
+  M = pagerank_matrix(graph, damping)
+  if modeparam[1] == "iter"
+    if !(modeparam[2] isa UInt32)
+      error("invalid param")
+    end
+    pagerank_iteration(graph.num_vertices, M, convert(UInt32, modeparam[2]))
+  elseif modeparam[1] == "epsi"
+    println("dummy")
+  else
+    error("invalid mode")
+  end
+end
+
+function pagerank_iteration(num_vertices::UInt32, M::Array{Float64, 2}, num_iterations::UInt32)
+  Base.power_by_squaring(M, num_iterations) * ones(Float64, num_vertices) / num_vertices
+end
+
+function pagerank_epsilon()
+  println("dummy")
+end
+
+function pagerank_matrix(graph::Graph, damping::Float64)
+  M = zeros(Float64, (graph.num_vertices, graph.num_vertices))
+  for vertex in graph.vertices
+    num_out_neighbors = length(vertex.out_neighbors)
+    if num_out_neighbors == 0
+      for index_to in 1:graph.num_vertices
+        M[index_to, vertex.index] = 1 / (graph.num_vertices - 1);
+      end
+      M[vertex.index, vertex.index] = 0
+    else
+      for index_to in vertex.out_neighbors
+        M[index_to, vertex.index] = 1 / num_out_neighbors;
+      end
+    end
+  end
+  map(x -> damping * x + (1 - damping) / graph.num_vertices, M)
 end
 
 end
