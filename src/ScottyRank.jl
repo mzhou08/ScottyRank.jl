@@ -20,7 +20,7 @@ end
 
 export read_graph
 
-function read_graph(filepath::String, filetype::String="el")
+function read_graph(filepath::String="data/medium-el.txt", filetype::String="el")
   if filetype == "el"
     read_edge_list(filepath)
   elseif filetype == "al"
@@ -64,31 +64,31 @@ end
 
 export pagerank
 
-function pagerank(graph::Graph; damping::Float64=0.85, modeparam::Tuple{String, Union{UInt32, Float64}}=("iter", UInt32(10)))
+function pagerank(graph::Graph; damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
   if damping < 0 || damping > 1
     error("invalid damping")
   end
   M = pagerank_matrix(graph, damping)
   if modeparam[1] == "iter"
-    if !(modeparam[2] isa UInt32)
+    if !(isinteger(modeparam[2])) || modeparam[2] < 0
       error("invalid param")
     end
-    pagerank_iteration(graph.num_vertices, M, modeparam[2])
+    pagerank_iteration(graph.num_vertices, M, UInt32(modeparam[2]))
   elseif modeparam[1] == "epsi"
-    if !(modeparam[2] isa Float64) || modeparam[2] < 0
+    if modeparam[2] <= 0
       error("invalid param")
     end
-    pagerank_epsilon(graph.num_vertices, M, modeparam[2])
+    pagerank_epsilon(graph.num_vertices, M, Float64(modeparam[2]))
   else
     error("invalid mode")
   end
 end
 
-function pagerank_iteration(num_vertices::UInt32, M::Array{Float64, 2}, num_iterations::UInt32)
+function pagerank_iteration(num_vertices::UInt32, M::Matrix{Float64}, num_iterations::UInt32)
   Base.power_by_squaring(M, num_iterations) * ones(Float64, num_vertices) / num_vertices
 end
 
-function pagerank_epsilon(num_vertices::UInt32, M::Array{Float64, 2}, epsilon::Float64)
+function pagerank_epsilon(num_vertices::UInt32, M::Matrix{Float64}, epsilon::Float64)
   prev = ones(Float64, num_vertices) / num_vertices
   curr = M * prev
   while norm(prev - curr) > epsilon
@@ -113,6 +113,27 @@ function pagerank_matrix(graph::Graph, damping::Float64)
     end
   end
   map(x -> damping * x + (1 - damping) / graph.num_vertices, M)
+end
+
+
+export hits_matrices, hits_update
+
+function hits_matrices(graph::Graph)
+  A = zeros(Float64, (graph.num_vertices, graph.num_vertices))
+  H = zeros(Float64, (graph.num_vertices, graph.num_vertices))
+  for vertex in graph.vertices
+    for index_to in vertex.out_neighbors
+      A[index_to, vertex.index] = 1
+    end
+    for index_from in vertex.in_neighbors
+      H[index_from, vertex.index] = 1
+    end
+  end
+  A, H
+end
+
+function hits_update(A::Matrix{Float64}, H::Matrix{Float64}, a::Vector{Float64}, h::Vector{Float64})
+  normalize(A * h), normalize(H * a)
 end
 
 end
