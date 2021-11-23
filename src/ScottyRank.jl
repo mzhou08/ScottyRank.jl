@@ -1,6 +1,7 @@
 module ScottyRank
 
 using DelimitedFiles
+using LinearAlgebra
 
 
 export Vertex, Graph
@@ -72,9 +73,12 @@ function pagerank(graph::Graph; damping::Float64=0.85, modeparam::Tuple{String, 
     if !(modeparam[2] isa UInt32)
       error("invalid param")
     end
-    pagerank_iteration(graph.num_vertices, M, convert(UInt32, modeparam[2]))
+    pagerank_iteration(graph.num_vertices, M, modeparam[2])
   elseif modeparam[1] == "epsi"
-    println("dummy")
+    if !(modeparam[2] isa Float64) || modeparam[2] < 0
+      error("invalid param")
+    end
+    pagerank_epsilon(graph.num_vertices, M, modeparam[2])
   else
     error("invalid mode")
   end
@@ -84,8 +88,13 @@ function pagerank_iteration(num_vertices::UInt32, M::Array{Float64, 2}, num_iter
   Base.power_by_squaring(M, num_iterations) * ones(Float64, num_vertices) / num_vertices
 end
 
-function pagerank_epsilon()
-  println("dummy")
+function pagerank_epsilon(num_vertices::UInt32, M::Array{Float64, 2}, epsilon::Float64)
+  prev = ones(Float64, num_vertices) / num_vertices
+  curr = M * prev
+  while norm(prev - curr) > epsilon
+    prev, curr = curr, M * curr
+  end
+  curr
 end
 
 function pagerank_matrix(graph::Graph, damping::Float64)
