@@ -1,13 +1,5 @@
 using DelimitedFiles
 using LinearAlgebra
-using Printf
-
-struct Vertex
-  index::UInt32
-  name::String
-  in_neighbors::Vector{UInt32}
-  out_neighbors::Vector{UInt32}
-end
 
 function readgraph(filename::String)
   file = open("graphs/" * filename * ".txt")

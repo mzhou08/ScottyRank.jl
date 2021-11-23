@@ -1,0 +1,4 @@
+name = "ScottyRank"
+uuid = "c2b90f32-862d-47ed-9c1a-038cf292535a"
+authors = ["Siyuan Daniel Chen <siyuanc2@andrew.cmu.edu>"]
+version = "0.1.0"
