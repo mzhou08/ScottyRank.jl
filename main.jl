@@ -1,5 +1,6 @@
 using DelimitedFiles
 using LinearAlgebra
+using Printf
 
 struct Vertex
   index::UInt32
@@ -74,8 +75,23 @@ function update(a, h) # HITS update function
   na / norm(na), nh / norm(nh)
 end
 
+function displayResults(M::Matrix{Float64}, V::Vector{Vertex}, n::UInt32) 
+
+  for i in 1:5
+    M = M*M
+  end
+
+  M = M[sortperm(M[:, 1], rev=true), :]
+
+  for i in 1:n
+    @printf("%s - %.4f\n", V[i].name, M[i, 1])
+  end
+end
+
 display(a)
 println()
 
 display(h)
 println()
+
+displayResults(M, V, n)
