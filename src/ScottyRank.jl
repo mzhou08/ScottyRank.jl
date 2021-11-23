@@ -116,7 +116,45 @@ function pagerank_matrix(graph::Graph, damping::Float64)
 end
 
 
-export hits_matrices, hits_update
+export hits
+
+function hits(graph::Graph; modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
+  A, H = hits_matrices(graph)
+  if modeparam[1] == "iter"
+    if !(isinteger(modeparam[2])) || modeparam[2] < 0
+      error("invalid param")
+    end
+    hits_iteration(graph.num_vertices, A, H, UInt32(modeparam[2]))
+  elseif modeparam[1] == "epsi"
+    if modeparam[2] <= 0
+      error("invalid param")
+    end
+    hits_epsilon(graph.num_vertices, A, H, Float64(modeparam[2]))
+  else
+    error("invalid mode")
+  end
+end
+
+function hits_iteration(num_vertices::UInt32, A::Matrix{Float64}, H::Matrix{Float64}, num_iterations::UInt32)
+  a, h = ones(Float64, num_vertices), ones(Float64, num_vertices)
+  for _ in 1:num_iterations
+    a, h = hits_update(A, H, a, h)
+  end
+  a, h
+end
+
+function hits_epsilon(num_vertices::UInt32, A::Matrix{Float64}, H::Matrix{Float64}, epsilon::Float64)
+  prev_a, prev_h = ones(Float64, num_vertices), ones(Float64, num_vertices)
+  curr_a, curr_h = hits_update(A, H, prev_a, prev_h)
+  while norm(prev_a - curr_a) > epsilon || norm(prev_h - curr_h) > epsilon
+    prev_a, prev_h, (curr_a, curr_h) = curr_a, curr_h, hits_update(A, H, curr_a, curr_h)
+  end
+  curr_a, curr_h
+end
+
+function hits_update(A::Matrix{Float64}, H::Matrix{Float64}, a::Vector{Float64}, h::Vector{Float64})
+  normalize(A * h), normalize(H * a)
+end
 
 function hits_matrices(graph::Graph)
   A = zeros(Float64, (graph.num_vertices, graph.num_vertices))
@@ -130,10 +168,6 @@ function hits_matrices(graph::Graph)
     end
   end
   A, H
-end
-
-function hits_update(A::Matrix{Float64}, H::Matrix{Float64}, a::Vector{Float64}, h::Vector{Float64})
-  normalize(A * h), normalize(H * a)
 end
 
 end
