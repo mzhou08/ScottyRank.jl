@@ -62,20 +62,19 @@ function hits(n::UInt32, V::Vector{Vertex})
   A, H
 end
 
-n, V = readgraph("food")
-M = pagerank(n, V)
-A, H = hits(n, V)
-
-a = ones(Float64, n)
-h = ones(Float64, n)
-
 function update(a, h) # HITS update function
   na = A * h
   nh = H * a
   na / norm(na), nh / norm(nh)
 end
 
+<<<<<<< HEAD
 function displayResults(M::Array{Float64, 2}, V::Vector{Vertex}, n::UInt32) 
+=======
+# Display the results of PageRank, in order
+function displayResults(M::Matrix{Float64}, V::Vector{Vertex}, n::UInt32) 
+
+>>>>>>> 6e8bd8d426e4411d8685ea511ee8150ff5874498
   for i in 1:5
     M = M*M
   end
@@ -87,10 +86,26 @@ function displayResults(M::Array{Float64, 2}, V::Vector{Vertex}, n::UInt32)
   end
 end
 
-display(a)
-println()
 
-display(h)
-println()
+function main()
+  print("Enter file to read, or 'exit' to exit:\n")
+  fileName = readline()
+  
+  while fileName != "exit"
+  
+    n, V = readgraph(fileName)
+    M = pagerank(n, V)
+    A, H = hits(n, V)
 
-displayResults(M, V, n)
+    # Make sure to update a and h later!
+    a = ones(Float64, n)
+    h = ones(Float64, n)
+
+    displayResults(M, V, n)
+
+    print("Enter another file to read, or 'exit' to exit:\n")
+    fileName = readline()
+  end
+end
+
+main()
