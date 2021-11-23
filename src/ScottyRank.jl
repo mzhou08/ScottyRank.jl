@@ -20,17 +20,17 @@ end
 
 export read_graph
 
-function read_graph(filepath::String="data/medium-el.txt", filetype::String="el")
+function read_graph(filepath::String="data/medium-el.txt"; filetype::String="el", zero_index::Bool=false)
   if filetype == "el"
-    read_edge_list(filepath)
+    read_edge_list(filepath, zero_index)
   elseif filetype == "al"
-    read_adjacency_list(filepath)
+    read_adjacency_list(filepath, zero_index)
   else
     error("invalid filetype")
   end
 end
 
-function read_edge_list(filepath::String)
+function read_edge_list(filepath::String, zero_index::Bool)
   file = open(filepath)
   num_vertices, num_edges = map(x -> convert(UInt32, x), readdlm(IOBuffer(readline(file))))
   vertices = Array{Vertex}(undef, num_vertices)
@@ -39,14 +39,19 @@ function read_edge_list(filepath::String)
   end
   for _ in 1:num_edges
     index_from, index_to = map(x -> convert(UInt32, x), readdlm(IOBuffer(readline(file))))
-    push!(vertices[index_from].out_neighbors, index_to)
-    push!(vertices[index_to].in_neighbors, index_from)
+    if zero_index
+      push!(vertices[index_from + 1].out_neighbors, index_to + 1)
+      push!(vertices[index_to + 1].in_neighbors, index_from + 1)
+    else
+      push!(vertices[index_from].out_neighbors, index_to)
+      push!(vertices[index_to].in_neighbors, index_from)
+    end
   end
   close(file)
   Graph(num_vertices, vertices)
 end
 
-function read_adjacency_list(filepath::String)
+function read_adjacency_list(filepath::String, zero_index::Bool)
   file = open(filepath)
   num_vertices = parse(UInt32, readline(file))
   vertices = Array{Vertex}(undef, num_vertices)
@@ -54,8 +59,13 @@ function read_adjacency_list(filepath::String)
     vertices[i] = Vertex(i, Array{UInt32}(undef, 0), Array{UInt32}(undef, 0));
   end
   for index_from in 1:num_vertices, index_to in map(x -> convert(UInt32, x), readdlm(IOBuffer(readline(file))))
-    push!(vertices[index_from].out_neighbors, index_to)
-    push!(vertices[index_to].in_neighbors, index_from)
+    if zero_index
+      push!(vertices[index_from].out_neighbors, index_to + 1)
+      push!(vertices[index_to + 1].in_neighbors, index_from)
+    else
+      push!(vertices[index_from].out_neighbors, index_to)
+      push!(vertices[index_to].in_neighbors, index_from)
+    end
   end
   close(file)
   Graph(num_vertices, vertices)
