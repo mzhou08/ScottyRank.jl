@@ -68,13 +68,7 @@ function update(a, h) # HITS update function
   na / norm(na), nh / norm(nh)
 end
 
-<<<<<<< HEAD
 function displayResults(M::Array{Float64, 2}, V::Vector{Vertex}, n::UInt32) 
-=======
-# Display the results of PageRank, in order
-function displayResults(M::Matrix{Float64}, V::Vector{Vertex}, n::UInt32) 
-
->>>>>>> 6e8bd8d426e4411d8685ea511ee8150ff5874498
   for i in 1:5
     M = M*M
   end
