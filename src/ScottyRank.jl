@@ -1,5 +1,7 @@
 module ScottyRank
 
-greet() = print("Hello World!")
+include("GraphModule.jl")
+include("IOModule.jl")
+export GraphModule, IOModule
 
-end # module
+end
