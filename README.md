@@ -1,4 +1,6 @@
-# pagerank-julia
+# ScottyRank
+
+Julia implementation for PageRank and HITS
 
 ## Term project for 21-241 Matrices and Linear Transformations
 
