@@ -2,6 +2,8 @@ module ScottyRank
 
 using DelimitedFiles
 using LinearAlgebra
+using GraphRecipes
+using Plots
 
 
 export Vertex, Graph
@@ -178,6 +180,31 @@ function hits_matrices(graph::Graph)
     end
   end
   A, H
+end
+
+
+export visualize
+
+function visualize(graph::Graph)
+  AM = zeros(Bool, graph.num_vertices, graph.num_vertices)
+  pg = pagerank(graph, modeparam=("iter", 100))
+  for vertex in graph.vertices, index_to in vertex.out_neighbors
+    AM[vertex.index, index_to] = true
+  end
+  graphplot(AM,
+            method=:chorddiagram,
+            names=map(x -> text(string(x), 6), pg),
+            linecolor=:black,
+            fillcolor=:darkgrey
+           )
+  #  graphplot(AM,
+            #  markersize = 0.2,
+            #  node_weights = pg,
+            #  markercolor = range(colorant"yellow", stop=colorant"red", length=11),
+            #  names = 1:11,
+            #  fontsize = 10,
+            #  linecolor = :darkgrey
+           #  )
 end
 
 end
