@@ -2,8 +2,9 @@ module ScottyRank
 
 using DelimitedFiles
 using LinearAlgebra
-using GraphRecipes
-using Plots
+using Printf
+#  using GraphRecipes
+#  using Plots
 
 
 export Vertex, Graph
@@ -16,13 +17,14 @@ end
 
 struct Graph
   num_vertices::UInt32
-  vertices::Vector{Vertex}
+  vertices::Vector{Vertex} # always sorted by index
 end
 
 
 export read_graph
 
-function read_graph(filepath::String="data/medium-el.txt"; filetype::String="el", zero_index::Bool=false)
+function read_graph(filepath::String="data/medium-el.txt";
+    filetype::String="el", zero_index::Bool=false)
   if filetype == "el"
     read_edge_list(filepath, zero_index)
   elseif filetype == "al"
@@ -37,7 +39,7 @@ function read_edge_list(filepath::String, zero_index::Bool)
   num_vertices, num_edges = map(x -> convert(UInt32, x), readdlm(IOBuffer(readline(file))))
   vertices = Array{Vertex}(undef, num_vertices)
   for i in 1:num_vertices
-    vertices[i] = Vertex(i, Array{UInt32}(undef, 0), Array{UInt32}(undef, 0));
+    vertices[i] = Vertex(i, Array{UInt32}(undef, 0), Array{UInt32}(undef, 0))
   end
   for _ in 1:num_edges
     index_from, index_to = map(x -> convert(UInt32, x), readdlm(IOBuffer(readline(file))))
@@ -58,7 +60,7 @@ function read_adjacency_list(filepath::String, zero_index::Bool)
   num_vertices = parse(UInt32, readline(file))
   vertices = Array{Vertex}(undef, num_vertices)
   for i in 1:num_vertices
-    vertices[i] = Vertex(i, Array{UInt32}(undef, 0), Array{UInt32}(undef, 0));
+    vertices[i] = Vertex(i, Array{UInt32}(undef, 0), Array{UInt32}(undef, 0))
   end
   for index_from in 1:num_vertices, index_to in map(x -> convert(UInt32, x), readdlm(IOBuffer(readline(file))))
     if zero_index
@@ -74,9 +76,41 @@ function read_adjacency_list(filepath::String, zero_index::Bool)
 end
 
 
-export pagerank
+export pagerank, pagerank_print
 
-function pagerank(graph::Graph; damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
+function pagerank_print(graph::Graph, pg::Vector{Float64};
+    num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"])
+  perm = sortperm(pg, rev=true)
+  for param in params
+    @printf(" - - %5s |", param)
+  end
+  println()
+  for line in 1:num_lines
+    for param in params
+      if param == "index"
+        @printf("%10d |", perm[line])
+      elseif param == "0ndex"
+        @printf("%10d |", perm[line] - 1)
+      elseif param == "val"
+        @printf("%10.2f |", pg[perm[line]])
+      elseif param == "vall"
+        @printf("%10.4f |", pg[perm[line]])
+      elseif param == "valll"
+        @printf("%10.6f |", pg[perm[line]])
+      elseif param == "in"
+        @printf("%10d |", length(graph.vertices[perm[line]].in_neighbors))
+      elseif param == "out"
+        @printf("%10d |", length(graph.vertices[perm[line]].out_neighbors))
+      else
+        error("invalid param")
+      end
+    end
+    println()
+  end
+end
+
+function pagerank(graph::Graph;
+    damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
   if damping < 0 || damping > 1
     error("invalid damping")
   end
@@ -115,12 +149,12 @@ function pagerank_matrix(graph::Graph, damping::Float64)
     num_out_neighbors = length(vertex.out_neighbors)
     if num_out_neighbors == 0
       for index_to in 1:graph.num_vertices
-        M[index_to, vertex.index] = 1 / (graph.num_vertices - 1);
+        M[index_to, vertex.index] = 1 / (graph.num_vertices - 1)
       end
       M[vertex.index, vertex.index] = 0
     else
       for index_to in vertex.out_neighbors
-        M[index_to, vertex.index] = 1 / num_out_neighbors;
+        M[index_to, vertex.index] = 1 / num_out_neighbors
       end
     end
   end
@@ -130,7 +164,8 @@ end
 
 export hits
 
-function hits(graph::Graph; modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
+function hits(graph::Graph;
+    modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
   A, H = hits_matrices(graph)
   if modeparam[1] == "iter"
     if !(isinteger(modeparam[2])) || modeparam[2] < 0
@@ -182,21 +217,20 @@ function hits_matrices(graph::Graph)
   A, H
 end
 
+#  export visualize
 
-export visualize
-
-function visualize(graph::Graph)
-  AM = zeros(Bool, graph.num_vertices, graph.num_vertices)
-  pg = pagerank(graph, modeparam=("iter", 100))
-  for vertex in graph.vertices, index_to in vertex.out_neighbors
-    AM[vertex.index, index_to] = true
-  end
-  graphplot(AM,
-            method=:chorddiagram,
-            names=map(x -> text(string(x), 6), pg),
-            linecolor=:black,
-            fillcolor=:darkgrey
-           )
+#  function visualize(graph::Graph)
+  #  AM = zeros(Bool, graph.num_vertices, graph.num_vertices)
+  #  pg = pagerank(graph, modeparam=("iter", 100))
+  #  for vertex in graph.vertices, index_to in vertex.out_neighbors
+    #  AM[vertex.index, index_to] = true
+  #  end
+  #  graphplot(AM,
+            #  method=:chorddiagram,
+            #  names=map(x -> text(string(x), 6), pg),
+            #  linecolor=:black,
+            #  fillcolor=:darkgrey
+           #  )
   #  graphplot(AM,
             #  markersize = 0.2,
             #  node_weights = pg,
@@ -205,6 +239,6 @@ function visualize(graph::Graph)
             #  fontsize = 10,
             #  linecolor = :darkgrey
            #  )
-end
+#  end
 
 end
