@@ -85,6 +85,7 @@ function pagerank_print(graph::Graph, pg::Vector{Float64};
     @printf(" - - %5s |", param)
   end
   println()
+  println("--- pagerank ---")
   for line in 1:num_lines
     for param in params
       if param == "index"
@@ -162,7 +163,63 @@ function pagerank_matrix(graph::Graph, damping::Float64)
 end
 
 
-export hits
+export hits, hits_print
+
+function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64};
+    num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"])
+  perm_a = sortperm(a, rev=true)
+  perm_h = sortperm(h, rev=true)
+  for param in params
+    @printf(" - - %5s |", param)
+  end
+  println()
+  println("--- authority ---")
+  for line in 1:num_lines
+    for param in params
+      if param == "index"
+        @printf("%10d |", perm_a[line])
+      elseif param == "0ndex"
+        @printf("%10d |", perm_a[line] - 1)
+      elseif param == "val"
+        @printf("%10.2f |", a[perm_a[line]])
+      elseif param == "vall"
+        @printf("%10.4f |", a[perm_a[line]])
+      elseif param == "valll"
+        @printf("%10.6f |", a[perm_a[line]])
+      elseif param == "in"
+        @printf("%10d |", length(graph.vertices[perm_a[line]].in_neighbors))
+      elseif param == "out"
+        @printf("%10d |", length(graph.vertices[perm_a[line]].out_neighbors))
+      else
+        error("invalid param")
+      end
+    end
+    println()
+  end
+  println("--- hub ---")
+  for line in 1:num_lines
+    for param in params
+      if param == "index"
+        @printf("%10d |", perm_h[line])
+      elseif param == "0ndex"
+        @printf("%10d |", perm_h[line] - 1)
+      elseif param == "val"
+        @printf("%10.2f |", h[perm_h[line]])
+      elseif param == "vall"
+        @printf("%10.4f |", h[perm_h[line]])
+      elseif param == "valll"
+        @printf("%10.6f |", h[perm_h[line]])
+      elseif param == "in"
+        @printf("%10d |", length(graph.vertices[perm_h[line]].in_neighbors))
+      elseif param == "out"
+        @printf("%10d |", length(graph.vertices[perm_h[line]].out_neighbors))
+      else
+        error("invalid param")
+      end
+    end
+    println()
+  end
+end
 
 function hits(graph::Graph;
     modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
