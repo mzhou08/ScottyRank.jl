@@ -3,8 +3,6 @@ module ScottyRank
 using DelimitedFiles
 using LinearAlgebra
 using Printf
-#  using GraphRecipes
-#  using Plots
 
 
 export Vertex, Graph
