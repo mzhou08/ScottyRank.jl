@@ -6,7 +6,6 @@ TODO:
 - Add ~3 more smaller test graphs to showcase accuracy of both algorithms
   - Need to be easily visualizable (5 to 20 nodes)
 - Add more medium to large datasets to showcase ability to handle tens of thousands of nodes
-- Implement adjacency matrix and adjacency list generation to provide functionality for Plots.jl
 
 ### Data
 
