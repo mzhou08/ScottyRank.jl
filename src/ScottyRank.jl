@@ -15,7 +15,7 @@ end
 
 struct Graph
   num_vertices::UInt32
-  vertices::Vector{Vertex} # always sorted by index
+  vertices::Vector{Vertex} # sorted by index
 end
 
 
@@ -272,28 +272,26 @@ function hits_matrices(graph::Graph)
   A, H
 end
 
-#  export visualize
 
-#  function visualize(graph::Graph)
-  #  AM = zeros(Bool, graph.num_vertices, graph.num_vertices)
-  #  pg = pagerank(graph, modeparam=("iter", 100))
-  #  for vertex in graph.vertices, index_to in vertex.out_neighbors
-    #  AM[vertex.index, index_to] = true
-  #  end
-  #  graphplot(AM,
-            #  method=:chorddiagram,
-            #  names=map(x -> text(string(x), 6), pg),
-            #  linecolor=:black,
-            #  fillcolor=:darkgrey
-           #  )
-  #  graphplot(AM,
-            #  markersize = 0.2,
-            #  node_weights = pg,
-            #  markercolor = range(colorant"yellow", stop=colorant"red", length=11),
-            #  names = 1:11,
-            #  fontsize = 10,
-            #  linecolor = :darkgrey
-           #  )
-#  end
+export generate_adjacency_matrix, generate_adjacency_list
+
+function generate_adjacency_matrix(graph::Graph)
+  AM = zeros(Bool, (graph.num_vertices, graph.num_vertices))
+  for vertex in graph.vertices, index_to in vertex.out_neighbors
+    AM[vertex.index, index_to] = true
+  end
+  AM
+end
+
+function generate_adjacency_list(graph::Graph)
+  AL = Array{Vector{UInt32}}(undef, graph.num_vertices)
+  for vertex in graph.vertices
+    AL[vertex.index] = Array{UInt32}(undef, 0)
+    for index_to in vertex.out_neighbors
+      push!(AL[vertex.index], index_to)
+    end
+  end
+  AL
+end
 
 end
