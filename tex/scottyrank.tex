@@ -1,1 +1,104 @@
-\textbf{ScottyRank Paper}
+\documentclass[12pt, titlepage, twoside]{amsart}
+
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage[foot]{amsaddr}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumitem}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage[cmintegrals, cmbraces]{newtxmath}
+\usepackage{ebgaramond-maths}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{lipsum}
+% \usepackage{microtype}
+% WILL TIDY UP PACKAGES LATER
+
+\newcommand{\R}{\ensuremath{\mathbb R}}
+\newcommand{\Z}{\ensuremath{\mathbb Z}}
+\newcommand{\N}{\ensuremath{\mathbb N}}
+\newcommand{\F}{\ensuremath{\mathbb F}}
+\newcommand{\C}{\ensuremath{\mathbb C}}
+
+\renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\norm}[1]{\ensuremath{\lVert #1\rVert}}
+\newcommand{\std}[1]{\ensuremath{\frac{#1}{\norm{#1}}}}
+\newcommand{\proj}[2]{\ensuremath{\mathrm{proj}_{#1}{#2}}}
+
+\theoremstyle{remark}
+  \newtheorem*{cl}{Claim}
+  \newtheorem*{pf}{Proof}
+
+\setenumerate{label=(\alph*)}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=Orchid,
+  urlcolor=ProcessBlue
+}
+
+\begin{document}
+
+\title[ScottyRank.jl]{ScottyRank.jl: A Julia Implementation of PageRank and HITS}
+
+\author{Siyuan Chen}
+\author{Michael Zhou}
+\email{siyuanc2@andrew.cmu.edu}
+\email{mhzhou@andrew.cmu.edu}
+\date{November 2021}
+
+\begin{abstract}
+  \lipsum[1]
+\end{abstract}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+\lipsum[1]
+
+\section{Background}
+
+\lipsum[1]
+
+\begin{lstlisting}
+export Vertex, Graph
+
+struct Vertex
+  index::UInt32
+  in_neighbors::Vector{UInt32}
+  out_neighbors::Vector{UInt32}
+end
+
+struct Graph
+  num_vertices::UInt32
+  vertices::Vector{Vertex} # sorted by index
+end
+\end{lstlisting}
+
+\lipsum[1]
+
+\section{Method}
+
+\lipsum[1]
+
+\section{Results}
+
+\lipsum[1]
+
+\section{Discussion}
+
+\lipsum[1]
+
+\section{Conclusion}
+
+\lipsum[1]
+
+\end{document}
