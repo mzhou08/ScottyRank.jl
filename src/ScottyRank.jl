@@ -11,7 +11,7 @@ export Vertex, Graph
 # A Vertex V has:
 # an unsigned integer index,
 # a list of indices of vertices that have directed edges pointing towards V,
-# a list of indices of vertices that V has direted edges pointing towards
+# a list of indices of vertices that V has directed edges pointing towards
 struct Vertex
   index::UInt32
   in_neighbors::Vector{UInt32}
@@ -29,6 +29,10 @@ end
 
 export read_graph
 
+# Constructing a Graph struct from a text file.
+# filepath: relative path to the file
+# filetype: "el" for edge list, "al" for adjacency list
+# zero_index: whether to zero-index or not
 function read_graph(filepath::String="data/medium-el.txt";
     filetype::String="el", zero_index::Bool=false)
   if filetype == "el"
@@ -40,6 +44,14 @@ function read_graph(filepath::String="data/medium-el.txt";
   end
 end
 
+# Reading an edge list file
+# Constructs a Graph of Vertices with the neighbors according to the file
+#
+# Format of edge list input files:
+# <number of vertices> <number of edges>
+# <Vertex A> <Vertex B> (represents a directed edge from Vertex A to Vertex B)
+# <Vertex B> <Vertex C>
+# ...
 function read_edge_list(filepath::String, zero_index::Bool)
   file = open(filepath)
   num_vertices, num_edges = map(x -> convert(UInt32, x), readdlm(IOBuffer(readline(file))))
@@ -61,6 +73,13 @@ function read_edge_list(filepath::String, zero_index::Bool)
   Graph(num_vertices, vertices)
 end
 
+# Reading an adjacency list file
+# Constructs a Graph of Vertices with the neighbors according to the file
+# Format of adjacency list input files:
+# <number of vertices>
+# <Vertex B> <Vertex C> ... (Represents directed edges from the first Vertex to Vertices B and C)
+# <Vertex A> <Vertex C> (Directed edges coming from the second Vertex)
+# ...
 function read_adjacency_list(filepath::String, zero_index::Bool)
   file = open(filepath)
   num_vertices = parse(UInt32, readline(file))
@@ -84,6 +103,8 @@ end
 
 export pagerank, pagerank_print
 
+# Prints results of PageRank.
+# num_lines: Prints the top num_lines 
 function pagerank_print(graph::Graph, pg::Vector{Float64};
     num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"])
   perm = sortperm(pg, rev=true)
