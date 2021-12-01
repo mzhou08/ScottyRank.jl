@@ -53,9 +53,10 @@
 \date{November 2021}
 
 \begin{abstract}
-PageRank is a method famously used by Google to determine the relative importance of different websites. More generally, PageRank can be applied to any directed graph of objects, where one wishes to find the most "important" nodes, as determined by a combination of the number of nodes pointing to it and the number of nodes that it points to. The HITS variation of the PageRank algorithm adds on "hub" and "authority" scores, which further distinguishes between nodes pointing to many others and nodes with many others pointing to it, respectively.
+PageRank is an algorithm famously used by Google to determine the relative importance of different websites for search results. More generally, PageRank and variations of the algorithm can be applied to any directed graph of objects, where one wishes to find the most "important" nodes, as determined by a combination of the number of nodes pointing to it and the number of nodes that it points to. In our implementation of PageRank, Markov Matrices simulating a random walk along the edges of a directed graph were used to determine each node's relative importance. At every step, the PageRank score of a given node would be distributed among the nodes that can be reached through a directed edge outward from the starting node. Our implementation of the HITS variation of the PageRank algorithm added "hub" and "authority" scores, which distinguish between nodes pointing to many other nodes (hubs) and nodes with many other nodes pointing to itself (authorities).
 
-In our project, we implemented both the PageRank and HITS algorithms using Julia to better understand the linear algebra insights behind the two algorithms.
+In our project, we implemented both the PageRank and HITS algorithms using Julia to better understand the linear algebra insights behind the two algorithms, and tested them on datasets of varying sizes and densities.
+
 \end{abstract}
 
 \maketitle
@@ -64,11 +65,31 @@ In our project, we implemented both the PageRank and HITS algorithms using Julia
 
 \section{Introduction}
 
-\lipsum[1]
 
-\section{Background}
+\section{Mathematical Background}
 
-\lipsum[1]
+\textbf{Markov Matrices and Random Walks}
+
+Markov Matrices and their applications to Random Walks are the foundational linear algebra concepts behind the PageRank algorithm.
+
+Markov Matrices are square matrices with strictly non-negative entries where the sum of entries in every column is equal to 1. Markov Matrices have several key properties that make them especially useful for iterative computing-- for a given Markov Matrix $M$, the following are true:
+
+
+Note that we are not dealing with positive MM's because we are doing random walks, which assume that at every step, there is a 0 probability that our marker stays at the current node.
+
+
+\textbf{Frobenius Norms}
+
+Frobenius Norms are used to calculate the norm of matrices in a way similar to vector magnitudes, and is especially useful for defining a notion of closeness between matrices. The Frobenius Norm of a matrix is the square root of the summation of the squares of all entries in the matrix.
+
+
+\section{Algorithms and Computations}
+
+\textbf{Custom Structs}
+
+We defined the structs Vertex and Graph to be used in our PageRank algorithms. Vertices were defined as structs with an unsigned integer index, a list of indices of vertices that have directed edges pointing towards V, and a list of indices of vertices that V has directed edges pointing towards, as shown in the code segment below. 
+
+For our purposes, we defined a Graph as a struct with the number of vertices and a list of the vertices in the graph sorted by their index.
 
 \begin{lstlisting}
 export Vertex, Graph
@@ -85,15 +106,13 @@ struct Graph
 end
 \end{lstlisting}
 
-\lipsum[1]
 
-\section{Method}
+\textbf{Reading Graphs and Vertices from Files}
 
-\lipsum[1]
-
+To read and construct graphs from text files, we wrote the functions read\_graph, read\_edge\_list, and read\_adjacency\_list.  
 \section{Results}
 
-\lipsum[1]
+Give a few examples of it running on our test cases and explain why the results are correct.
 
 \section{Discussion}
 
