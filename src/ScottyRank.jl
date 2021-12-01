@@ -6,13 +6,21 @@ using Printf
 
 
 export Vertex, Graph
-
+# The following structs are used for our representations of graphs.
+#
+# A Vertex V has:
+# an unsigned integer index,
+# a list of indices of vertices that have directed edges pointing towards V,
+# a list of indices of vertices that V has direted edges pointing towards
 struct Vertex
   index::UInt32
   in_neighbors::Vector{UInt32}
   out_neighbors::Vector{UInt32}
 end
 
+# For our purposes, we defined a Graph as a struct with:
+# the number of vertices,
+# a list of the vertices in the graph sorted by their index.
 struct Graph
   num_vertices::UInt32
   vertices::Vector{Vertex} # sorted by index
