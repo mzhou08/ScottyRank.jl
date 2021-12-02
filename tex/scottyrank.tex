@@ -104,10 +104,31 @@ end
 
 \textbf{Reading Graphs and Vertices from Files}
 
-To read and construct graphs from text files, we wrote the functions read\_graph, read\_edge\_list, and read\_adjacency\_list.  
+The functions read\_graph, read\_edge\_list, and read\_adjacency\_list are used to read and construct graphs from text files.
+
+The format for an edge list input file is as follows:
+
+\begin{lstlisting}[basicstyle=\small]
+<num_vertices> <num_edges>
+# Directed edge from Vertex with index 1 to Vertex with index 2.
+1 2
+# More generally,
+<Index from> <Index to>
+...
+\end{lstlisting}
+
+The format for an adjacency list input file is as follows:
+
+\begin{lstlisting}[basicstyle=\small]
+<num_vertices>
+# Vertices that the first Vertex has directed edges towards
+<Index> <Index> < Index > ...
+...
+\end{lstlisting}
 
 \textbf{PageRank Matrix Generation}
 
+In our general PageRank algorithm, we will use the PageRank matrix generated from the graph $G$.
 
 \textbf{PageRank General Algorithm}
 
