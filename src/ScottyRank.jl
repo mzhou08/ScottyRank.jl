@@ -10,6 +10,8 @@ export pagerank_print, pagerank
 export hits_print, hits
 export generate_adjacency_matrix, generate_adjacency_list
 
+# TYPES
+
 """
     Vertex
 
@@ -39,6 +41,8 @@ struct Graph
   num_vertices::UInt32
   vertices::Vector{Vertex}
 end
+
+# INPUT
 
 """
     read_graph(filepath::String="data/medium-el.txt"); filetype::String="el", zero_index::Bool=false) -> Graph
@@ -107,8 +111,12 @@ function read_adjacency_list(filepath::String, zero_index::Bool)
   Graph(num_vertices, vertices)
 end
 
+# PAGERANK
+
 """
-    function pagerank_print(graph::Graph, pg::Vector{Float64}; num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"]) -> Nothing
+    function pagerank_print(graph::Graph, pg::Vector{Float64};
+        num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"]
+      ) -> Nothing
 
 Pretty-prints information about the vertices with top PageRank scores to stdout
 
@@ -166,7 +174,9 @@ function pagerank_print(graph::Graph, pg::Vector{Float64};
 end
 
 """
-    function pagerank(graph::Graph; damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)) -> Vector{Float64}
+    function pagerank(graph::Graph;
+        damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)
+      ) -> Vector{Float64}
 
 Computes PageRank scores for the graph
 
@@ -234,8 +244,12 @@ function pagerank_matrix(graph::Graph, damping::Float64)
   map(x -> damping * x + (1 - damping) / graph.num_vertices, M)
 end
 
+# HITS
+
 """
-    function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64}; num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"]) -> Nothing
+    function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64};
+        num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"]
+      ) -> Nothing
 
 Pretty-prints information about the vertices with top Authority and Hub scores (separately) to stdout
 
@@ -318,7 +332,9 @@ function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64};
 end
 
 """
-    function hits(graph::Graph; modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)) -> Tuple{Vector{Float64}, Vector{Float64}}
+    function hits(graph::Graph;
+        modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)
+      ) -> Tuple{Vector{Float64}, Vector{Float64}}
 
 Computes Hub and Authority scores (HITS) for the graph
 
@@ -385,6 +401,8 @@ function hits_matrices(graph::Graph)
   end
   A, H
 end
+
+# OUTPUT
 
 """
     function generate_adjacency_matrix(graph::Graph) -> Matrix{Bool}
