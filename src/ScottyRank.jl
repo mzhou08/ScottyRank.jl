@@ -221,7 +221,8 @@ function pagerank(graph::Graph;
 end
 
 function pagerank_iteration(num_vertices::UInt32, M::Matrix{Float64}, num_iterations::UInt32)
-  Base.power_by_squaring(M, num_iterations) * ones(Float64, num_vertices) / num_vertices
+  M_pwr = Base.power_by_squaring(M, num_iterations) 
+  M_pwr * (ones(Float64, num_vertices) / num_vertices)
 end
 
 function pagerank_epsilon(num_vertices::UInt32, M::Matrix{Float64}, epsilon::Float64)
