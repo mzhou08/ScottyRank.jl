@@ -4,35 +4,57 @@ using DelimitedFiles
 using LinearAlgebra
 using Printf
 
-
 export Vertex, Graph
-# The following structs are used for our representations of graphs.
-#
-# A Vertex V has:
-# an unsigned integer index,
-# a list of indices of vertices that have directed edges pointing towards V,
-# a list of indices of vertices that V has directed edges pointing towards
+export read_graph
+export pagerank, pagerank_print
+export hits, hits_print
+export generate_adjacency_matrix, generate_adjacency_list
+
+"""
+    Vertex
+
+ScottyRank vertex
+
+# Fields
+- `index::UInt32`: stores the 1-based index as an unsigned integer
+- `in_neighbors::Vector{UInt32}`: stores the indices of incoming neighbors as a list
+- `out_neighbors::Vector{UInt32}`: stores the indices of outgoing neighbors as a list
+"""
 struct Vertex
   index::UInt32
   in_neighbors::Vector{UInt32}
   out_neighbors::Vector{UInt32}
 end
 
-# For our purposes, we defined a Graph as a struct with:
-# the number of vertices,
-# a list of the vertices in the graph sorted by their index.
+"""
+    Graph
+
+ScottyRank graph
+
+# Fields
+- `num_vertices`: stores the number of vertices as an unsigned integer
+- `vertices::Vector{Vertex}`: stores the vertices as a sorted list
+"""
 struct Graph
   num_vertices::UInt32
-  vertices::Vector{Vertex} # sorted by index
+  vertices::Vector{Vertex}
 end
 
+"""
+    read_graph(filepath::String="data/medium-el.txt"); filetype::String="el", zero_index::Bool=false) -> Graph
 
-export read_graph
+Reads a graph from an edge list/adjacency list file
 
-# Constructing a Graph struct from a text file.
-# filepath: relative path to the file
-# filetype: "el" for edge list, "al" for adjacency list
-# zero_index: whether to zero-index or not
+# Arguments
+- `filepath::String="data/medium-el.txt"`: the path to the source file
+
+# Keywords
+- `filetype::String="el"`: "el" for edge list, "al" for adjacency list
+- `zero_index::Bool=false`: false for 1-based index, true for 0-based index
+
+# Returns
+- `Graph`: the graph from the source file
+"""
 function read_graph(filepath::String="data/medium-el.txt";
     filetype::String="el", zero_index::Bool=false)
   if filetype == "el"
@@ -44,14 +66,6 @@ function read_graph(filepath::String="data/medium-el.txt";
   end
 end
 
-# Reading an edge list file
-# Constructs a Graph of Vertices with the neighbors according to the file
-#
-# Format of edge list input files:
-# <number of vertices> <number of edges>
-# <Vertex A> <Vertex B> (represents a directed edge from Vertex A to Vertex B)
-# <Vertex B> <Vertex C>
-# ...
 function read_edge_list(filepath::String, zero_index::Bool)
   file = open(filepath)
   num_vertices, num_edges = map(x -> convert(UInt32, x), readdlm(IOBuffer(readline(file))))
@@ -73,13 +87,6 @@ function read_edge_list(filepath::String, zero_index::Bool)
   Graph(num_vertices, vertices)
 end
 
-# Reading an adjacency list file
-# Constructs a Graph of Vertices with the neighbors according to the file
-# Format of adjacency list input files:
-# <number of vertices>
-# <Vertex B> <Vertex C> ... (Represents directed edges from the first Vertex to Vertices B and C)
-# <Vertex A> <Vertex C> (Directed edges coming from the second Vertex)
-# ...
 function read_adjacency_list(filepath::String, zero_index::Bool)
   file = open(filepath)
   num_vertices = parse(UInt32, readline(file))
@@ -100,13 +107,34 @@ function read_adjacency_list(filepath::String, zero_index::Bool)
   Graph(num_vertices, vertices)
 end
 
+"""
+    function pagerank_print(graph::Graph, pg::Vector{Float64}; num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"]) -> Nothing
 
-export pagerank, pagerank_print
+Pretty-prints information about the vertices with top PageRank scores to stdout
 
-# Prints results of PageRank.
-# num_lines: Prints the top num_lines 
+# Arguments
+- `graph::Graph`: the graph
+- `pg::Vector{Float64}`: the PageRank scores for the graph
+
+# Keywords
+- `num_lines::Union{Int64, UInt32}=10`: the number of vertices whose information is printed
+- `params::Vector{String}=String["vall", "index", "in", "out"]`: the types of information printed in order
+  - `index`: 1-based index
+  - `0ndex`: 0-based index
+  - `val`: PageRank score, two digits after decimal
+  - `vall`: PageRank score, four digits after decimal
+  - `valll`: PageRank score, six digits after decimal
+  - `in`: number of incoming neighbors
+  - `out`: number of outgoing neighbors
+
+# Returns
+- `Nothing`
+"""
 function pagerank_print(graph::Graph, pg::Vector{Float64};
     num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"])
+  if num_lines > graph.num_vertices
+    error("invalid num_lines")
+  end
   perm = sortperm(pg, rev=true)
   for param in params
     @printf(" - - %5s |", param)
@@ -189,11 +217,11 @@ function pagerank_matrix(graph::Graph, damping::Float64)
   map(x -> damping * x + (1 - damping) / graph.num_vertices, M)
 end
 
-
-export hits, hits_print
-
 function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64};
     num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"])
+  if num_lines > graph.num_vertices
+    error("invalid num_lines")
+  end
   perm_a = sortperm(a, rev=true)
   perm_h = sortperm(h, rev=true)
   for param in params
@@ -300,9 +328,6 @@ function hits_matrices(graph::Graph)
   end
   A, H
 end
-
-
-export generate_adjacency_matrix, generate_adjacency_list
 
 function generate_adjacency_matrix(graph::Graph)
   AM = zeros(Bool, (graph.num_vertices, graph.num_vertices))
