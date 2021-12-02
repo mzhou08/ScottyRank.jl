@@ -6,8 +6,8 @@ using Printf
 
 export Vertex, Graph
 export read_graph
-export pagerank, pagerank_print
-export hits, hits_print
+export pagerank_print, pagerank
+export hits_print, hits
 export generate_adjacency_matrix, generate_adjacency_list
 
 """
@@ -50,7 +50,7 @@ Reads a graph from an edge list/adjacency list file
 
 # Keywords
 - `filetype::String="el"`: "el" for edge list, "al" for adjacency list
-- `zero_index::Bool=false`: false for 1-based index, true for 0-based index
+- `zero_index::Bool=false`: whether the input file is zero-based
 
 # Returns
 - `Graph`: the graph from the source file
@@ -119,8 +119,8 @@ Pretty-prints information about the vertices with top PageRank scores to stdout
 # Keywords
 - `num_lines::Union{Int64, UInt32}=10`: the number of vertices whose information is printed
 - `params::Vector{String}=String["vall", "index", "in", "out"]`: the types of information printed in order
-  - `index`: 1-based index
-  - `0ndex`: 0-based index
+  - `index`: one-based index
+  - `0ndex`: zero-based index
   - `val`: PageRank score, two digits after decimal
   - `vall`: PageRank score, four digits after decimal
   - `valll`: PageRank score, six digits after decimal
@@ -217,6 +217,30 @@ function pagerank_matrix(graph::Graph, damping::Float64)
   map(x -> damping * x + (1 - damping) / graph.num_vertices, M)
 end
 
+"""
+    function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64}; num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"]) -> Nothing
+
+Pretty-prints information about the vertices with top Authority and Hub scores (separately) to stdout
+
+# Arguments
+- `graph::Graph`: the graph
+- `a::Vector{Float64}`: the Authority scores for the graph
+- `h::Vector{Float64}`: the Hub scores for the graph
+
+# Keywords
+- `num_lines::Union{Int64, UInt32}=10`: the number of vertices whose information is printed
+- `params::Vector{String}=String["vall", "index", "in", "out"]`: the types of information printed in order
+  - `index`: one-based index
+  - `0ndex`: zero-based index
+  - `val`: PageRank score, two digits after decimal
+  - `vall`: PageRank score, four digits after decimal
+  - `valll`: PageRank score, six digits after decimal
+  - `in`: number of incoming neighbors
+  - `out`: number of outgoing neighbors
+
+# Returns
+- `Nothing`
+"""
 function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64};
     num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"])
   if num_lines > graph.num_vertices
@@ -329,6 +353,17 @@ function hits_matrices(graph::Graph)
   A, H
 end
 
+"""
+    function generate_adjacency_matrix(graph::Graph) -> Matrix{Bool}
+
+Generates the adjacency matrix representation for the graph
+
+# Arguments
+- `graph::Graph`: the graph
+
+# Returns
+- `Matrix{Bool}`: the adjacency matrix representation for the graph
+"""
 function generate_adjacency_matrix(graph::Graph)
   AM = zeros(Bool, (graph.num_vertices, graph.num_vertices))
   for vertex in graph.vertices, index_to in vertex.out_neighbors
@@ -337,12 +372,30 @@ function generate_adjacency_matrix(graph::Graph)
   AM
 end
 
-function generate_adjacency_list(graph::Graph)
+"""
+    function generate_adjacency_list(graph::Graph) -> Vector{Vector{UInt32}}
+
+Generates the adjacency list representation for the graph
+
+# Arguments
+- `graph::Graph`: the graph
+
+# Keywords
+- `zero_index::Bool=false`: whether the output file is zero-based
+
+# Returns
+- `Vector{Vector{Bool}}`: the adjacency list representation for the graph
+"""
+function generate_adjacency_list(graph::Graph; zero_index::Bool=false)
   AL = Array{Vector{UInt32}}(undef, graph.num_vertices)
   for vertex in graph.vertices
     AL[vertex.index] = Array{UInt32}(undef, 0)
     for index_to in vertex.out_neighbors
-      push!(AL[vertex.index], index_to)
+      if zero_index
+        push!(AL[vertex.index], index_to - 1)
+      else
+        push!(AL[vertex.index], index_to)
+      end
     end
   end
   AL
