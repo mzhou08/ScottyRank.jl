@@ -109,8 +109,22 @@ To read and construct graphs from text files, we wrote the functions read\_graph
 
 \textbf{Pagerank - Epsilon Variation}
 
-In the Epsilon variation of our PageRank implementation, instead of multiplying the Markov Matrices a fixed amount of times, we conue multiplying the expression $M^k(1/n, 1/n, ... 1/n)$ by $M$ on the left until the norm of the difference between the vector $M^{k+1}(1/n, 1/n, ... 1/n)$ and the matrix $M^k(1/n, 1/n, ... 1/n)$ is less than a caller-specified limit, which is the value of Epsilon.
+In the Epsilon variation of our PageRank implementation, we start with the expression $M(\frac{1}{n}\vec{1}) = M(\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, where $M$ is our PageRank matrix generated from the graph, and $n$ is the number of vertices. The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
 
+Next, instead of multiplying $(\frac{1}{n}\vec{1})$ by $M$ a fixed amount of times, we continue multiplying the vector by $M$ on the left until the norm of the difference between the vector $M^{k+1}(1/n, 1/n, ... 1/n)$ and the matrix $M^k(\frac{1}{n}, \frac{1}{n}, ... \frac{1}{n})$ is less than a caller-specified limit, which is the value of epsilon.
+
+\begin{lstlisting}
+function pagerank_epsilon(num_vertices::UInt32, 
+  M::Matrix{Float64}, epsilon::Float64)
+  
+  prev = ones(Float64, num_vertices) / num_vertices
+  curr = M * prev
+  while norm(prev - curr) > epsilon
+    prev, curr = curr, M * curr
+  end
+  curr
+end
+\end{lstlisting}
 
 \section{Results}
 
