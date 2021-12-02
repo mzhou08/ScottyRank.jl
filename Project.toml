@@ -1,6 +1,6 @@
 name = "ScottyRank"
 uuid = "519f14d6-3e10-4728-84d9-e0599d0f812e"
-authors = ["Siyuan Daniel Chen <siyuanc2@andrew.cmu.edu>", "Michael Zhou <mhzhou@andrew.cmu.edu>"]
+authors = ["Siyuan Chen <siyuanc2@andrew.cmu.edu>", "Michael Zhou <mhzhou@andrew.cmu.edu>"]
 version = "0.1.0"
 
 [deps]

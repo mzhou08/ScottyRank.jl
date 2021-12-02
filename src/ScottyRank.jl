@@ -1,3 +1,10 @@
+"""
+    module ScottyRank
+
+Provides PageRank and HITS analysis functionalities for directed graphs.
+
+Siyuan Chen & Michael Zhou, November 2021.
+"""
 module ScottyRank
 
 using DelimitedFiles
@@ -10,7 +17,7 @@ export pagerank_print, pagerank
 export hits_print, hits
 export generate_adjacency_matrix, generate_adjacency_list
 
-# TYPES: Vertex, Graph
+# export Vertex, Graph
 
 """
     Vertex
@@ -42,7 +49,7 @@ struct Graph
   vertices::Vector{Vertex}
 end
 
-# INPUT: read_graph
+# export read_graph
 
 """
     read_graph(filepath::String="data/medium-el.txt"); filetype::String="el", zero_index::Bool=false) -> Graph
@@ -111,7 +118,7 @@ function read_adjacency_list(filepath::String, zero_index::Bool)
   Graph(num_vertices, vertices)
 end
 
-# PAGERANK: pagerank_print, pagerank
+#  export pagerank_print, pagerank
 
 """
     function pagerank_print(graph::Graph, pg::Vector{Float64};
@@ -244,7 +251,7 @@ function pagerank_matrix(graph::Graph, damping::Float64)
   map(x -> damping * x + (1 - damping) / graph.num_vertices, M)
 end
 
-# HITS: hits_print, hits
+# export hits_print, hits
 
 """
     function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64};
@@ -402,7 +409,7 @@ function hits_matrices(graph::Graph)
   A, H
 end
 
-# OUTPUT: generate_adjacency_matrix, generate_adjacency_list
+# export generate_adjacency_matrix, generate_adjacency_list
 
 """
     function generate_adjacency_matrix(graph::Graph) -> Matrix{Bool}
