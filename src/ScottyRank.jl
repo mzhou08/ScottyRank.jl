@@ -46,7 +46,7 @@ end
 Reads a graph from an edge list/adjacency list file
 
 # Arguments
-- `filepath::String="data/medium-el.txt"`: the path to the source file
+- `filepath::String="data/medium-el.txt"`: the path to the source file (default: Wikipedia PageRank graph)
 
 # Keywords
 - `filetype::String="el"`: "el" for edge list, "al" for adjacency list
@@ -165,6 +165,23 @@ function pagerank_print(graph::Graph, pg::Vector{Float64};
   end
 end
 
+"""
+    function pagerank(graph::Graph; damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)) -> Vector{Float64}
+
+Computes PageRank scores for the graph
+
+# Arguments
+- `graph::Graph`: the graph
+
+# Keywords
+- `damping::Float64=0.85`: the damping factor for PageRank
+- `modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)`: the mode and the parameters for PageRank
+  - `("iter", num_iterations::Union{Int64, UInt32})`: PageRank for a given number of iterations
+  - `("epsi", epsilon::Union{Int64, UInt32, Float64})`: PageRank until convergence with epsilon
+
+# Returns
+- `Vector{Float64}`: the PageRank scores for the graph
+"""
 function pagerank(graph::Graph;
     damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
   if damping < 0 || damping > 1
@@ -232,9 +249,9 @@ Pretty-prints information about the vertices with top Authority and Hub scores (
 - `params::Vector{String}=String["vall", "index", "in", "out"]`: the types of information printed in order
   - `index`: one-based index
   - `0ndex`: zero-based index
-  - `val`: PageRank score, two digits after decimal
-  - `vall`: PageRank score, four digits after decimal
-  - `valll`: PageRank score, six digits after decimal
+  - `val`: Authority/Hub score, two digits after decimal
+  - `vall`: Authority/Hub score, four digits after decimal
+  - `valll`: Authority/Hub score, six digits after decimal
   - `in`: number of incoming neighbors
   - `out`: number of outgoing neighbors
 
@@ -300,6 +317,22 @@ function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64};
   end
 end
 
+"""
+    function hits(graph::Graph; modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)) -> Tuple{Vector{Float64}, Vector{Float64}}
+
+Computes Hub and Authority scores (HITS) for the graph
+
+# Arguments
+- `graph::Graph`: the graph
+
+# Keywords
+- `modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)`: the mode and the parameters for HITS
+  - `("iter", num_iterations::Union{Int64, UInt32})`: HITS for a given number of iterations
+  - `("epsi", epsilon::Union{Int64, UInt32, Float64})`: HITS until convergence with epsilon (both Hub and Authority)
+
+# Returns
+- `Tuple{Vector{Float64}, Vector{Float64}}`: the Hub and Authoriy scores for the graph
+"""
 function hits(graph::Graph;
     modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
   A, H = hits_matrices(graph)
