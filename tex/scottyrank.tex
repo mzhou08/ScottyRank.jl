@@ -78,24 +78,6 @@ Markov Matrices are square matrices with strictly non-negative entries where the
 Note that we are not dealing with positive MM's because we are doing random walks, which assume that at every step, there is a 0 probability that our marker stays at the current node.
 
 
-\textbf{Frobenius Norms}
-
-The Frobenius Norm is used to calculate the norm of matrices in a way similar to vector magnitudes, and is especially useful for defining a notion of closeness between matrices. The Frobenius Norm of a matrix $M$, denoted by $||M||_F$, is the square root of the summation of the squares of all entries in the matrix.
-
-As an example, for $A=\begin{pmatrix}1&2\\3&4\end{pmatrix}$
-
-$||A||_F = \sqrt{1^2 + 2^2+ 3^2+ 4^2} = \sqrt{30}$
-
-To provide some intuition for further applications of the Frobenius Norm, we will calculate $||A-B||_F$ where $B=\begin{pmatrix}1&1.5\\3&4\end{pmatrix}$.
-
-\[A-B = \begin{pmatrix}0&0.5\\0&0\end{pmatrix}\]
-\[||A-B||_F = \sqrt{0^2+(0.5)^2+0^2+0^2} = 0.5\]
-
-Thus, we see that the "closer" two matrices are, the smaller the Frobenius Norm of their difference.
-
-In our project, Frobenius Norms are used in the Epsilon variants of the PageRank and HITS algorithms. In these variations, instead of multiplying the Markov Matrices a fixed amount of times, we use Frobenius Norms and keep multiplying the matrices by themselves until the Frobenius norm of the difference between the matrix $M$ and the matrix $MM$ is less than a specified limit, which is the value of Epsilon.
-
-
 \section{Algorithms and Computations}
 
 \textbf{Custom Structs}
@@ -123,6 +105,13 @@ end
 \textbf{Reading Graphs and Vertices from Files}
 
 To read and construct graphs from text files, we wrote the functions read\_graph, read\_edge\_list, and read\_adjacency\_list.  
+
+
+\textbf{Pagerank - Epsilon Variation}
+
+In the Epsilon variation of our PageRank implementation, instead of multiplying the Markov Matrices a fixed amount of times, we conue multiplying the expression $M^k(1/n, 1/n, ... 1/n)$ by $M$ on the left until the norm of the difference between the vector $M^{k+1}(1/n, 1/n, ... 1/n)$ and the matrix $M^k(1/n, 1/n, ... 1/n)$ is less than a caller-specified limit, which is the value of Epsilon.
+
+
 \section{Results}
 
 Give a few examples of it running on our test cases and explain why the results are correct.
