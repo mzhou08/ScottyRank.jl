@@ -4,35 +4,61 @@ using DelimitedFiles
 using LinearAlgebra
 using Printf
 
-
 export Vertex, Graph
-# The following structs are used for our representations of graphs.
-#
-# A Vertex V has:
-# an unsigned integer index,
-# a list of indices of vertices that have directed edges pointing towards V,
-# a list of indices of vertices that V has directed edges pointing towards
+export read_graph
+export pagerank_print, pagerank
+export hits_print, hits
+export generate_adjacency_matrix, generate_adjacency_list
+
+# TYPES: Vertex, Graph
+
+"""
+    Vertex
+
+ScottyRank vertex
+
+# Fields
+- `index::UInt32`: stores the 1-based index as an unsigned integer
+- `in_neighbors::Vector{UInt32}`: stores the indices of incoming neighbors as a list
+- `out_neighbors::Vector{UInt32}`: stores the indices of outgoing neighbors as a list
+"""
 struct Vertex
   index::UInt32
   in_neighbors::Vector{UInt32}
   out_neighbors::Vector{UInt32}
 end
 
-# For our purposes, we defined a Graph as a struct with:
-# the number of vertices,
-# a list of the vertices in the graph sorted by their index.
+"""
+    Graph
+
+ScottyRank graph
+
+# Fields
+- `num_vertices`: stores the number of vertices as an unsigned integer
+- `vertices::Vector{Vertex}`: stores the vertices as a sorted list
+"""
 struct Graph
   num_vertices::UInt32
-  vertices::Vector{Vertex} # sorted by index
+  vertices::Vector{Vertex}
 end
 
+# INPUT: read_graph
 
-export read_graph
+"""
+    read_graph(filepath::String="data/medium-el.txt"); filetype::String="el", zero_index::Bool=false) -> Graph
 
-# Constructing a Graph struct from a text file.
-# filepath: relative path to the file
-# filetype: "el" for edge list, "al" for adjacency list
-# zero_index: whether to zero-index or not
+Reads a graph from an edge list/adjacency list file
+
+# Arguments
+- `filepath::String="data/medium-el.txt"`: the path to the source file (default: Wikipedia PageRank graph)
+
+# Keywords
+- `filetype::String="el"`: "el" for edge list, "al" for adjacency list
+- `zero_index::Bool=false`: whether the input file is zero-based
+
+# Returns
+- `Graph`: the graph from the source file
+"""
 function read_graph(filepath::String="data/medium-el.txt";
     filetype::String="el", zero_index::Bool=false)
   if filetype == "el"
@@ -44,14 +70,6 @@ function read_graph(filepath::String="data/medium-el.txt";
   end
 end
 
-# Reading an edge list file
-# Constructs a Graph of Vertices with the neighbors according to the file
-#
-# Format of edge list input files:
-# <number of vertices> <number of edges>
-# <Vertex A> <Vertex B> (represents a directed edge from Vertex A to Vertex B)
-# <Vertex B> <Vertex C>
-# ...
 function read_edge_list(filepath::String, zero_index::Bool)
   file = open(filepath)
   num_vertices, num_edges = map(x -> convert(UInt32, x), readdlm(IOBuffer(readline(file))))
@@ -73,13 +91,6 @@ function read_edge_list(filepath::String, zero_index::Bool)
   Graph(num_vertices, vertices)
 end
 
-# Reading an adjacency list file
-# Constructs a Graph of Vertices with the neighbors according to the file
-# Format of adjacency list input files:
-# <number of vertices>
-# <Vertex B> <Vertex C> ... (Represents directed edges from the first Vertex to Vertices B and C)
-# <Vertex A> <Vertex C> (Directed edges coming from the second Vertex)
-# ...
 function read_adjacency_list(filepath::String, zero_index::Bool)
   file = open(filepath)
   num_vertices = parse(UInt32, readline(file))
@@ -100,13 +111,38 @@ function read_adjacency_list(filepath::String, zero_index::Bool)
   Graph(num_vertices, vertices)
 end
 
+# PAGERANK: pagerank_print, pagerank
 
-export pagerank, pagerank_print
+"""
+    function pagerank_print(graph::Graph, pg::Vector{Float64};
+        num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"]
+      ) -> Nothing
 
-# Prints results of PageRank.
-# num_lines: Prints the top num_lines 
+Pretty-prints information about the vertices with top PageRank scores to stdout
+
+# Arguments
+- `graph::Graph`: the graph
+- `pg::Vector{Float64}`: the PageRank scores for the graph
+
+# Keywords
+- `num_lines::Union{Int64, UInt32}=10`: the number of vertices whose information is printed
+- `params::Vector{String}=String["vall", "index", "in", "out"]`: the types of information printed in order
+  - `index`: one-based index
+  - `0ndex`: zero-based index
+  - `val`: PageRank score, two digits after decimal
+  - `vall`: PageRank score, four digits after decimal
+  - `valll`: PageRank score, six digits after decimal
+  - `in`: number of incoming neighbors
+  - `out`: number of outgoing neighbors
+
+# Returns
+- `Nothing`
+"""
 function pagerank_print(graph::Graph, pg::Vector{Float64};
     num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"])
+  if num_lines > graph.num_vertices
+    error("invalid num_lines")
+  end
   perm = sortperm(pg, rev=true)
   for param in params
     @printf(" - - %5s |", param)
@@ -137,6 +173,25 @@ function pagerank_print(graph::Graph, pg::Vector{Float64};
   end
 end
 
+"""
+    function pagerank(graph::Graph;
+        damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)
+      ) -> Vector{Float64}
+
+Computes PageRank scores for the graph
+
+# Arguments
+- `graph::Graph`: the graph
+
+# Keywords
+- `damping::Float64=0.85`: the damping factor for PageRank
+- `modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)`: the mode and the parameters for PageRank
+  - `("iter", num_iterations::Union{Int64, UInt32})`: PageRank for a given number of iterations
+  - `("epsi", epsilon::Union{Int64, UInt32, Float64})`: PageRank until convergence with epsilon
+
+# Returns
+- `Vector{Float64}`: the PageRank scores for the graph
+"""
 function pagerank(graph::Graph;
     damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
   if damping < 0 || damping > 1
@@ -189,11 +244,39 @@ function pagerank_matrix(graph::Graph, damping::Float64)
   map(x -> damping * x + (1 - damping) / graph.num_vertices, M)
 end
 
+# HITS: hits_print, hits
 
-export hits, hits_print
+"""
+    function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64};
+        num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"]
+      ) -> Nothing
 
+Pretty-prints information about the vertices with top Authority and Hub scores (separately) to stdout
+
+# Arguments
+- `graph::Graph`: the graph
+- `a::Vector{Float64}`: the Authority scores for the graph
+- `h::Vector{Float64}`: the Hub scores for the graph
+
+# Keywords
+- `num_lines::Union{Int64, UInt32}=10`: the number of vertices whose information is printed
+- `params::Vector{String}=String["vall", "index", "in", "out"]`: the types of information printed in order
+  - `index`: one-based index
+  - `0ndex`: zero-based index
+  - `val`: Authority/Hub score, two digits after decimal
+  - `vall`: Authority/Hub score, four digits after decimal
+  - `valll`: Authority/Hub score, six digits after decimal
+  - `in`: number of incoming neighbors
+  - `out`: number of outgoing neighbors
+
+# Returns
+- `Nothing`
+"""
 function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64};
     num_lines::Union{Int64, UInt32}=10, params::Vector{String}=String["vall", "index", "in", "out"])
+  if num_lines > graph.num_vertices
+    error("invalid num_lines")
+  end
   perm_a = sortperm(a, rev=true)
   perm_h = sortperm(h, rev=true)
   for param in params
@@ -248,6 +331,24 @@ function hits_print(graph::Graph, a::Vector{Float64}, h::Vector{Float64};
   end
 end
 
+"""
+    function hits(graph::Graph;
+        modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)
+      ) -> Tuple{Vector{Float64}, Vector{Float64}}
+
+Computes Hub and Authority scores (HITS) for the graph
+
+# Arguments
+- `graph::Graph`: the graph
+
+# Keywords
+- `modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10)`: the mode and the parameters for HITS
+  - `("iter", num_iterations::Union{Int64, UInt32})`: HITS for a given number of iterations
+  - `("epsi", epsilon::Union{Int64, UInt32, Float64})`: HITS until convergence with epsilon (both Hub and Authority)
+
+# Returns
+- `Tuple{Vector{Float64}, Vector{Float64}}`: the Hub and Authoriy scores for the graph
+"""
 function hits(graph::Graph;
     modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
   A, H = hits_matrices(graph)
@@ -301,9 +402,19 @@ function hits_matrices(graph::Graph)
   A, H
 end
 
+# OUTPUT: generate_adjacency_matrix, generate_adjacency_list
 
-export generate_adjacency_matrix, generate_adjacency_list
+"""
+    function generate_adjacency_matrix(graph::Graph) -> Matrix{Bool}
 
+Generates the adjacency matrix representation for the graph
+
+# Arguments
+- `graph::Graph`: the graph
+
+# Returns
+- `Matrix{Bool}`: the adjacency matrix representation for the graph
+"""
 function generate_adjacency_matrix(graph::Graph)
   AM = zeros(Bool, (graph.num_vertices, graph.num_vertices))
   for vertex in graph.vertices, index_to in vertex.out_neighbors
@@ -312,12 +423,30 @@ function generate_adjacency_matrix(graph::Graph)
   AM
 end
 
-function generate_adjacency_list(graph::Graph)
+"""
+    function generate_adjacency_list(graph::Graph) -> Vector{Vector{UInt32}}
+
+Generates the adjacency list representation for the graph
+
+# Arguments
+- `graph::Graph`: the graph
+
+# Keywords
+- `zero_index::Bool=false`: whether the output file is zero-based
+
+# Returns
+- `Vector{Vector{Bool}}`: the adjacency list representation for the graph
+"""
+function generate_adjacency_list(graph::Graph; zero_index::Bool=false)
   AL = Array{Vector{UInt32}}(undef, graph.num_vertices)
   for vertex in graph.vertices
     AL[vertex.index] = Array{UInt32}(undef, 0)
     for index_to in vertex.out_neighbors
-      push!(AL[vertex.index], index_to)
+      if zero_index
+        push!(AL[vertex.index], index_to - 1)
+      else
+        push!(AL[vertex.index], index_to)
+      end
     end
   end
   AL
