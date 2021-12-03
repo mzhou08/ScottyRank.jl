@@ -148,7 +148,7 @@ PageRank models the behavior of a typical web surfer as a damped random walk.
           \item \ldots and there are links exiting the current site, the surfer
             clicks on a random link (and visits the site it points to) out of those links with equal probability.
           \item \ldots and there aren't any links exiting the current site, the surfer simply
-            visits a random site out of all sites with equal probability.
+            visits a random site out of all other sites with equal probability.
         \end{enumerate}
 
       \item If the surfer loses interest, they simply visits a random site out of all sites with equal probability.
@@ -178,8 +178,10 @@ $M$ is the $n\times n$ matrix where
     & \mathcal{A}_{ij} = 1 \\
     \frac{1 - \lambda}{n}
     & \mathcal{A}_{ij} = 0\wedge\mathrm{out}(j) > 0 \\
-    \frac{\lambda}{n} + \frac{1 - \lambda}{n}
-    & \mathrm{out}(j) = 0
+    \frac{\lambda}{n - 1} + \frac{1 - \lambda}{n}
+    & i \neq j\wedge\mathrm{out}(j) = 0 \\
+    \frac{1 - \lambda}{n}
+    & i = j\wedge\mathrm{out}(j) = 0
   \end{cases}
   \right],
 \]
@@ -335,43 +337,21 @@ end
 
 \subsection{PageRank}
 
-The function \mintinline{julia}/pagerank/ generates a vector containing the PageRank scores of the
-vertices calculated from the user-provided graph.
+We divide the PageRank algorithm into three steps:
 
-It takes the parameters \mintinline{julia}/graph/,
-which is the directed graph of vertices we will apply PageRank to,
-and \mintinline{julia}/damping/, which the the damping factor-- the assumed probability that a surfer will stop traveling on any given move.
+\begin{enumerate}
+  \item Generating the transition matrix: \mintinline{julia}{pagerank_matrix}.
+  \item Running the transition process: \mintinline{julia}{pagerank_iteration}, \mintinline{julia}{pagerank_epsilon}.
+  \item Returning the desired output: \mintinline{julia}{pagerank_print}, \mintinline{julia}{pagerank}.
+\end{enumerate}
 
-\subsubsection{PageRank Matrix Generation}
+\subsubsection{Generating the transition matrix}
 
-The function \mintinline{julia}/pagerank_matrix/ generates a Markov Matrix $M$ that will be used in the PageRank algorithm.
+The function \mintinline{julia}{pagerank_matrix} generates a Markov matrix $M$ that specifies the transition
+probabilities of the PageRank transition process.
 
-To generate this matrix $M$, we iterate through all vertices of the graph.
-If the vertex $V$ has no outgoing neighbors (no outgoing edges),
-the surfer should continue surfing at a new random vertex $W$.
-So, there should be an equal probability that the surfer ends up at any other vertex $W$ in the graph.
-Thus, we add the value $\frac{1}{\text{\mintinline{julia}/num_vertices - 1/}}$
-to the matrix entries that represents the probability of the surfer ending up at
-any one of the remaining vertices $W$ from $V$, which are $M_{VW}$, coded as \mintinline{julia}/M[W, V]/.
-
-Otherwise, there should be an equal probability that our surfer goes to any one of the vertices $V_p$that the current vertex $V$ has directed edges towards.
-So for every one of the vertices $V_p$ that the current vertex $V$ points to,
-we add the reciprocal of the number of outgoing neighbors of the current vertex
-($\frac{1}{\text{\mintinline{julia}/num_out_neighbors/}}$) to the matrix entry representing the probability that we end up at $V_p$ from $V$,
-which is
-to represent the the aforementioned idea.
-
-Finally, we apply the damping factor to the matrix.
-Since the damping factor represents the probability that a su$M_{VV_p}$, coded as \mintinline{julia}/M[V_p, V]/,rfer will continue surfing at any given vertex,
-we multiply the PageRank value of every entry in the matrix by the damping factor.
-Then, we must add the value $\frac{1-\text{\mintinline{julia}/damping/}}{\text{\mintinline{julia}/num_vertices/}-1}$ to each entry in the matrix.
-We add the previous fraction because if the surfer stops surfing at a given vertex $V$,
-we want to continue calculating PageRank,
-so we assume the surfer picks back up at any vertex.
-Since there are \mintinline{julia}/num_vertices/ vertices,
-and the probability a surfer stops surfing at $V$ is \mintinline{julia}/1-damping/,
-we must add $\frac{1-\text{\mintinline{julia}/damping/}}{\text{\mintinline{julia}/num_vertices/}-1}$
-to each entry in the matrix.
+We first compute the entries in $M$ prior to damping, casing on whether the origin vertex is a ``sink''
+(no outgoing neighbors), and then apply the damping at the end.
 
 \begin{minted}{julia}
 function pagerank_matrix(graph::Graph, damping::Float64)
@@ -393,69 +373,26 @@ function pagerank_matrix(graph::Graph, damping::Float64)
 end
 \end{minted}
 
-\subsubsection{PageRank General Algorithm}
+\subsubsection{Running the transition process}
 
-In our general PageRank algorithm \mintinline{julia}/pagerank/,
-we first generate a PageRank Markov Matrix from the user-provided graph,
-then we apply either the iterative or epsilon method to calculate a resultant vector with the PageRank scores, simulating the results of a continued random walk.
+The functions \mintinline{julia}{pagerank_iteration} and \mintinline{julia}{pagerank_epsilon} both generate
+an initial stochastic vector and the transition matrix and then carry out the transition process.
 
-\mintinline{julia}/pagerank/ takes in the following parameters:
-
-\begin{itemize}[label={}]
-\item \mintinline{julia}/graph/: the user-defined graph
-
-\item \mintinline{julia}/damping/: the damping factor for PageRank.
-This is the assumed probability that a surfer will stop traveling on any given move. Defaulted to 0.85
-
-\item \mintinline{julia}/modeparam/: the mode and the parameters for PageRank.
-Designates the calculation method we will use--
-either \mintinline{julia}/"iter"/ for the iterative method or \mintinline{julia}/"epsi"/ for the epsilon method.
-
-Iterative: \mintinline{julia}/modeparam = ("iter", num_iterations)/:
-PageRank for a given number of iterations
-
-Epsilon: \mintinline{julia}/modeparam = ("epsi", epsilon)/: PageRank until convergence with epsilon
-\end{itemize}
-
-\subsubsection{PageRank - Iterative Method}
-
-The \mintinline{julia}/pagerank_iteration/ function calculates PageRank with the iterative method.
-We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$,
-where $M$ is our PageRank matrix generated from the graph,
-and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/).
-The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
-
-Our result of the iterative method is the vector $M^k (\frac{1}{n}\vec{1})$,
-where $k$ is the value passed in as \mintinline{julia}/num_iterations/.
+\mintinline{julia}{pagerank_iteration} runs the process for a given number of iterations.
 
 \begin{minted}{julia}
-function pagerank_iteration(num_vertices::UInt32,
-  M::Matrix{Float64}, num_iterations::UInt32)
-
-  M_pwr = Base.power_by_squaring(M, num_iterations)
+function pagerank_iteration(num_vertices::UInt32, M::Matrix{Float64}, num_iterations::UInt32)
+  M_pwr = Base.power_by_squaring(M, num_iterations) 
   M_pwr * (ones(Float64, num_vertices) / num_vertices)
 end
 \end{minted}
 
-
- \subsubsection{Pagerank - Epsilon Method}
-
-In the epsilon method of our PageRank calculations (\mintinline{julia}/pagerank_epsilon/),
-similar to the Iterative method,
-we start with the expression $M(\frac{1}{n}\vec{1}) = M(\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$,
-where $M$ is our PageRank matrix generated from the graph,
-and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/).
-The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
-
-Next, instead of multiplying $(\frac{1}{n}\vec{1})$ by $M$ a fixed amount of times,
-we continue multiplying the vector by $M$ on the left until the norm of the difference between the vector $M^{k+1}(1/n, 1/n, ... 1/n)$
-and the matrix $M^k(\frac{1}{n}, \frac{1}{n}, ... \frac{1}{n})$ is
-less than the caller-specified limit of epsilon.
+\mintinline{julia}{pagerank_epsilon} runs the process until the norm of the difference vector
+is smaller than a given threshold, or until
+$\left\lVert\vec{v}_{k + 1} - \vec{k}\right\rVert < \epsilon$.
 
 \begin{minted}{julia}
-function pagerank_epsilon(num_vertices::UInt32,
-  M::Matrix{Float64}, epsilon::Float64)
-
+function pagerank_epsilon(num_vertices::UInt32, M::Matrix{Float64}, epsilon::Float64)
   prev = ones(Float64, num_vertices) / num_vertices
   curr = M * prev
   while norm(prev - curr) > epsilon
@@ -464,6 +401,41 @@ function pagerank_epsilon(num_vertices::UInt32,
   curr
 end
 \end{minted}
+
+\subsubsection{Returning the desired output}
+
+We expose two functions to the client: \mintinline{julia}{pagerank} and \mintinline{julia}{pagerank_print}.
+
+\mintinline{julia}{pagerank} calculates the PageRank scores for the input \mintinline{julia}{graph},
+with the option to specify the damping factor and the type of transition process.
+
+\begin{minted}{julia}
+function pagerank(graph::Graph;
+    damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
+  if damping < 0 || damping > 1
+    error("invalid damping")
+  end
+  M = pagerank_matrix(graph, damping)
+  if modeparam[1] == "iter"
+    if !(isinteger(modeparam[2])) || modeparam[2] < 0
+      error("invalid param")
+    end
+    pagerank_iteration(graph.num_vertices, M, UInt32(modeparam[2]))
+  elseif modeparam[1] == "epsi"
+    if modeparam[2] <= 0
+      error("invalid param")
+    end
+    pagerank_epsilon(graph.num_vertices, M, Float64(modeparam[2]))
+  else
+    error("invalid mode")
+  end
+end
+\end{minted}
+
+\mintinline{julia}{pagerank_print} pretty-prints the PageRank scores along with relevant information about the top
+vertices for the input \mintinline{julia}{graph} and scores \mintinline{julia}{pg}.
+
+The code for \mintinline{julia}{pagerank_print} can be found in the Appendix.
 
 \subsection{HITS Algorithm}
 
