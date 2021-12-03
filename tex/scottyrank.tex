@@ -12,7 +12,7 @@
 \usepackage{tikz}
 \usepackage{listings}
 \usepackage{lipsum}
-\usepackage[cache=false]{minted}
+\usepackage{minted}
 \usepackage{hyperref}
 
 \newcommand{\R}{\ensuremath{\mathbb R}}
@@ -26,7 +26,7 @@
   urlcolor=ProcessBlue
 }
 
-\usemintedstyle{stata-dark}
+\setminted{linenos, breaklines}
 
 \raggedright
 
@@ -213,5 +213,35 @@ filler
 \subsubsection{Matrix representation}
 
 filler
+
+\begin{minted}{julia}
+# export read_graph
+
+"""
+    read_graph(filepath::String="data/medium-el.txt"); filetype::String="el", zero_index::Bool=false) -> Graph
+
+Reads a graph from an edge list/adjacency list file
+
+# Arguments
+- `filepath::String="data/medium-el.txt"`: the path to the source file (default: Wikipedia PageRank graph)
+
+# Keywords
+- `filetype::String="el"`: "el" for edge list, "al" for adjacency list
+- `zero_index::Bool=false`: whether the input file is zero-based
+
+# Returns
+- `Graph`: the graph from the source file
+"""
+function read_graph(filepath::String="data/medium-el.txt";
+    filetype::String="el", zero_index::Bool=false)
+  if filetype == "el"
+    read_edge_list(filepath, zero_index)
+  elseif filetype == "al"
+    read_adjacency_list(filepath, zero_index)
+  else
+    error("invalid filetype")
+  end
+end
+\end{minted}
 
 \end{document}
