@@ -340,32 +340,80 @@ because each component of the resultant vector is the sum of the authority score
 So to update the authority and hub scores, at every step we set the updated authority scores to the product of the authority matrix and current hub scores (coded as \mintinline{julia}/A*h/), and the updated hub scores to the product of the hub matrix and the current authority scores (coded as \mintinline{julia}/H*a/).
 
 \begin{minted}{julia}
-function hits_update(A::Matrix{Float64}, H::Matrix{Float64}, a::Vector{Float64}, h::Vector{Float64})
+function hits_update(A::Matrix{Float64}, 
+  H::Matrix{Float64}, a::Vector{Float64}, h::Vector{Float64})
+  
   normalize(A * h), normalize(H * a)
 end
 \end{minted}
 
 \subsubsection{HITS - Iterative Method}
 
-The \mintinline{julia}/hits_iteration/ function calculates HITS with the iterative method. 
-We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, 
-where $M$ is our PageRank matrix generated from the graph, 
-and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/).
-The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
+The \mintinline{julia}/hits_iteration/ function calculates HITS with the iterative method.
+Its parameters are the number of vertices \mintinline{julia}/num_vertices/,
+the authority matrix \mintinline{julia}/A/, the hub matrix \mintinline{julia}/H/,
+and the number of iterations \mintinline{julia}/num_iterations/.
 
-Our result of the iterative method is the vector $M^k (\frac{1}{n}\vec{1})$, 
-where $k$ is the value passed in as \mintinline{julia}/num_iterations/.
+We start with the authority and hub scores all set to the ones vector, with \mintinline{julia}/num_vertices/ components each.
+
+Next, we update the authority and hub vectors, which are \mintinline{julia}/a/ and \mintinline{julia}/h/ respectively,
+using the function \mintinline{julia}/hits_update/ at every step for \mintinline{julia}/num_iterations/ iterations, and return the resulting two vectors of authority and hub scores.
 
 \begin{minted}{julia}
-=
+function hits_iteration(num_vertices::UInt32, A::Matrix{Float64}, 
+  H::Matrix{Float64}, num_iterations::UInt32)
+  
+  a, h = ones(Float64, num_vertices), ones(Float64, num_vertices)
+  for _ in 1:num_iterations
+    a, h = hits_update(A, H, a, h)
+  end
+  a, h
+end
 \end{minted}
 
 
 \subsubsection{HITS - Epsilon Method}
 
+The \mintinline{julia}/hits_epsilon/ function calculates HITS with the epsilon method.
+Similar to \mintinline{julia}/hits_iteration/, its parameters are the number of vertices \mintinline{julia}/num_vertices/,
+the authority matrix \mintinline{julia}/A/, the hub matrix \mintinline{julia}/H/,
+and the convergence cutoff \mintinline{julia}/epsilon/.
+
+We start with the authority and hub scores all set to the ones vector, with \mintinline{julia}/num_vertices/ components each.
+
+Next, we repeatedly update the authority and hub vectors,
+which are \mintinline{julia}/a/ and \mintinline{julia}/h/ respectively,
+using the function \mintinline{julia}/hits_update/ at every step until
+the norm between the previous and updated authority scores is less than epsilon and
+the norm between the previous and updated hub scores is also less than epsilon.
+
+Finally, the resulting two vectors of authority and hub scores are returned.
+
+\begin{minted}[fontsize=\small]{julia}
+function hits_epsilon(num_vertices::UInt32, A::Matrix{Float64},
+  H::Matrix{Float64}, epsilon::Float64)
+  
+  prev_a, prev_h = ones(Float64, num_vertices), ones(Float64, num_vertices)
+  curr_a, curr_h = hits_update(A, H, prev_a, prev_h)
+  while norm(prev_a - curr_a) > epsilon || norm(prev_h - curr_h) > epsilon
+    prev_a, prev_h, (curr_a, curr_h) = curr_a, curr_h, hits_update(A, H, curr_a, curr_h)
+  end
+  curr_a, curr_h
+end
+\end{minted}
+
 \subsection{Output}
 
-For PageRank, the function \mintinline{julia}/print_pagerank/ prints the Vertices with the top PageRank scores to standard output.
+For PageRank, the function \mintinline{julia}/print_pagerank/ prints
+the Vertices with the top PageRank scores to standard output in an organized format.
+
+
+
+For HITS, the function \mintinline{julia}/hits_print/ prints
+the Vertices with the top HITS authority and hub scores separately to standard output in
+an organized format.
+
+The parameters for \mintinline{julia}/hits_print/ are:
 
 %\section{Results}
 
