@@ -3,6 +3,7 @@
 Term project for 21-241 Matrices and Linear Transformations
 
 TODO:
+- Add in functionality for reading URL's
 - Add ~3 more smaller test graphs to showcase accuracy of both algorithms
   - Need to be easily visualizable (5 to 20 nodes)
 - Add more medium to large datasets to showcase ability to handle tens of thousands of nodes
