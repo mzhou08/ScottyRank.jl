@@ -44,7 +44,9 @@
 
 \section{Mathematical Background}
 
-\subsection{Definitions}
+\subsection{Linear Algebra}
+
+\subsubsection{Definitions}
 
 Positive matrices are defined as matrices with positive entries.
 
@@ -54,7 +56,7 @@ where $\vec{1}\in\R^n$ has all ones as components.
 
 Positive Markov matrices are defined as, well, positive Markov matrices.
 
-\subsection{Facts}
+\subsubsection{Facts}
 
 (Perron-Frobenius theorem)
 Let $A$ be a positive square matrix.
@@ -69,7 +71,7 @@ Let $M'$ be a positive Markov matrix.
 Let $\lambda_1$ be $M'$'s maximum eigenvalue in terms of absolute values.
 Then $\lambda_1 = 1$ and has algebraic (and subsequently geometric) multiplicity $1$.
 
-\subsection{Usage}
+\subsubsection{Usage}
 
 Let $M$ be a $n\times n$ Markov matrix.
 Then $M$ specifies a dicrete memoryless transition process between $n$ states, namely the process where
@@ -85,10 +87,120 @@ Then $\vec{v}$ specifies an (initial) discrete probability distribution over the
   [\Pr(\text{state }i\text{ at time }0) = \vec{v}_i].
 \]
 
-Then
+Then the probability distribution over the $n$ states after $t$ steps of the transition process specified by $M$ is precisely $M^t\vec{v}$,
+or equivalently
 \[
-  (\forall (k, i)\in\N\times[n])
-  \left[\Pr(\text{state }i\text{ at time }k) = \left(M^k\vec{v}\right)_i\right].
+  (\forall (t, i)\in\N\times[n])
+  \left[\Pr(\text{state }i\text{ at time }t) = \left(M^t\vec{v}\right)_i\right].
 \]
+
+\subsection{Graph Theory}
+
+\subsubsection{Definitions}
+
+A simple directed graph is defined as an unweighted directed graph without self-referential edges or multiple edges
+between the same origin destination pair.
+
+For a simple directed graph with $n$ vertices, the adjacency matrix $\mathcal{A}$ is defined to be
+the $n\times n$ matrix where
+\[
+  (\forall (i, j)\in[n]\times[n])\left(A_{ij} = 
+    \begin{cases}
+      1 & \text{there is an edge to $i$ from $j$} \\
+      0 & \text{otherwise}
+    \end{cases}
+  \right).
+\]
+
+\subsubsection{Facts}
+
+For a simple directed graph with $n$ vertices and its adjacency matrix $\mathcal{A}$,
+\begin{align*}
+  (\forall j\in[n])&
+  \left[\text{number of outgoing neighbors from vertex $j$} = \mathrm{out}(j) = (\mathcal{A}_{*j})^T\vec{1}\right] \\
+  (\forall i\in[n])&
+  \left[\text{number of incoming neighbors to vertex $i$} = \mathrm{in}(i) = (\mathcal{A}_{i*})^T\vec{1}\right].
+\end{align*}
+
+\clearpage
+
+\section{Algorithms}
+
+\subsection{The network model}
+
+Both algorithms, PageRank and HITS, model the network of interest as a simple directed graph with websites as vertices
+and links as edges.
+This implies that there will be no self-referential links, no duplicate links between the same origin
+and destination pair, and no priority difference between links.
+
+\subsection{PageRank}
+
+\subsubsection{The random walk}
+
+PageRank models the behavior of a typical web surfer as a damped random walk.
+
+\begin{enumerate}
+  \item The surfer starts out by visiting a random site out of all sites with equal probability.
+  \item At every step, the surfer has a probability $\lambda$ of continuing surfing and a complementary
+    $1 - \lambda$ probability of losing interest, for a predetermined $\lambda$.
+  
+    \begin{enumerate}
+      \item If the surfer continues \ldots
+
+        \begin{enumerate}
+          \item \ldots and there are links exiting the current site, the surfer
+            clicks on a random link (and visits the site it points to) out of those links with equal probability.
+          \item \ldots and there aren't any links exiting the current site, the surfer simply
+            visits a random site out of all sites with equal probability.
+        \end{enumerate}
+
+      \item If the surfer loses interest, they simply visits a random site out of all sites with equal probability.
+    \end{enumerate}
+
+\end{enumerate}
+
+To best model a typical surfer's probability of continuing surfing, $\lambda$, also known as the damping factor,
+is empirically determined to be around $0.85$.
+
+\subsubsection{Matrix representation}
+
+Let $n$ be the number of websites in the network of interest.
+Let $\mathcal{A}$ be the adjacency matrix for the network of interest.
+Let $\langle\vec{v}_{t}\rangle_{t\in\N}$ be the probability distributions describing the
+website the surfer is visiting at time $t$.
+Let $M$ be the transition matrix for the random walk process.
+
+Then $\vec{v}_0 = \vec{1} / n$,
+$M$ is the $n\times n$ matrix where
+\[
+  (\forall (i, j)\in[n]\times[n])
+  \left[
+  M_{ij} =
+  \begin{cases}
+    \frac{\lambda}{\mathrm{out}(j)} + \frac{1 - \lambda}{n}
+    & \mathcal{A}_{ij} = 1 \\
+    \frac{1 - \lambda}{n}
+    & \mathcal{A}_{ij} = 0\wedge\mathrm{out}(j) > 0 \\
+    \frac{\lambda}{n} + \frac{1 - \lambda}{n}
+    & \mathrm{out}(j) = 0
+  \end{cases}
+  \right],
+\]
+and
+\[
+  (\forall t\in\N)\left(\vec{v}_t = M^t\vec{v}_0\right).
+\]
+
+\subsubsection{Definition}
+
+The PageRank score for a given website in the network of interest is defined as the probabilty of a typical surfer
+visiting that website after an indefinitely long damped random walk.
+In matrix form,
+\[
+  (\forall i\in[n])
+  \left[\mathrm{PageRank}(i) = \lim_{t\to\infty}(\vec{v}_t)_i = \lim_{t\to\infty}\left(M^t\vec{v}_0\right)_i\right].
+\]
+
+The actually ranking is produced after sorting the websites by PageRank score from high to low.
 
 \end{document}
