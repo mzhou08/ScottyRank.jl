@@ -132,19 +132,39 @@ The format for an adjacency list input file is as follows:
 The function \mintinline{julia}/pagerank/ generates a vector containing the PageRank scores of the
 vertices calculated from the user-provided graph.
 
+It takes the parameters \mintinline{julia}/graph/,
+which is the directed graph of vertices we will apply PageRank to,
+and \mintinline{julia}/damping/, which the the damping factor-- the assumed probability that a graph traveler will stop traveling on any given move.
+
 \subsubsection{PageRank Matrix Generation}
 
 The function \mintinline{julia}/pagerank_matrix/ generates a Markov Matrix that will be used in the PageRank algorithm.
 
 \subsubsection{PageRank General Algorithm}
 
-In our general PageRank algorithm, we will use the PageRank matrix generated from the user-provided graph.
+In our general PageRank algorithm \mintinline{julia}/pagerank/,
+we first generate a PageRank Markov Matrix from the user-provided graph,
+then we apply either the iterative or epsilon method to calculate a resultant matrix simulating the results of a continued random walk.
 
+\mintinline{julia}/pagerank/ takes in the following parameters:
 
+\begin{itemize}[label={}]
+\item \mintinline{julia}/graph/: the user-defined graph
 
-\subsubsection{PageRank - Iterative Variation}
+\item \mintinline{julia}/damping/: the damping factor for PageRank. 
+This is the assumed probability that a graph traveler will stop traveling on any given move. Defaulted to 0.85
 
-The first method that we can use to calculate PageRank is the Iterative method. 
+\item \mintinline{julia}/modeparam/: the mode and the parameters for PageRank.
+Designates the calculation method we will use-- either \mintinline{julia}/"iter"/ for the iterative method or \mintinline{julia}/"epsi"/ for the epsilon method.
+
+Iterative: \mintinline{julia}/modeparam = ("iter", num_iterations)/:
+PageRank for a given number of iterations
+Epsilon: \mintinline{julia}/modeparam = ("epsi", epsilon)/: PageRank until convergence with epsilon
+\end{itemize}
+
+\subsubsection{PageRank - Iterative Method}
+
+The first method that we can use to calculate PageRank is the iterative method. 
 We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, 
 where $M$ is our PageRank matrix generated from the graph, 
 and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/).
@@ -163,9 +183,9 @@ end
 \end{minted}
 
 
- \subsubsection{Pagerank - Epsilon Variation}
+ \subsubsection{Pagerank - Epsilon Method}
 
-In the Epsilon method of our PageRank calculations (\mintinline{julia}/pagerank_epsilon/), 
+In the epsilon method of our PageRank calculations (\mintinline{julia}/pagerank_epsilon/), 
 similar to the Iterative method, 
 we start with the expression $M(\frac{1}{n}\vec{1}) = M(\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, 
 where $M$ is our PageRank matrix generated from the graph, 
@@ -175,7 +195,7 @@ The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\ti
 Next, instead of multiplying $(\frac{1}{n}\vec{1})$ by $M$ a fixed amount of times,
 we continue multiplying the vector by $M$ on the left until the norm of the difference between the vector $M^{k+1}(1/n, 1/n, ... 1/n)$
 and the matrix $M^k(\frac{1}{n}, \frac{1}{n}, ... \frac{1}{n})$ is
-less than the caller-specified limit of Epsilon.
+less than the caller-specified limit of epsilon.
 
 \begin{lstlisting}
 function pagerank_epsilon(num_vertices::UInt32, 
