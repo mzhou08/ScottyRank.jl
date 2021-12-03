@@ -75,8 +75,7 @@ Markov Matrices and their applications to Random Walks are the foundational line
 Markov Matrices are square matrices with strictly non-negative entries where the sum of entries in every column is equal to 1. Markov Matrices have several key properties that make them especially useful for iterative computing-- for a given Markov Matrix $M$, the following are true:
 
 
-Note that we are not dealing with positive MM's because we are doing random walks, which assume that at every step, there is a 0 probability that our marker stays at the current node.
-
+In our PageRank implementation, our Markov Matrices are not positive (all entries positive) because we are doing random walks, which assume that at every step, there is a 0 probability that our marker stays at the current node.
 
 \section{Algorithms and Computations}
 
@@ -136,10 +135,7 @@ In our general PageRank algorithm, we will use the PageRank matrix generated fro
 
 \item \textbf{PageRank - Iterative Variation}
 
-The first method that we can use to calculate PageRank is the Iterative method. 
-
-
-We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, where $M$ is our PageRank matrix generated from the graph, and $n$ is the number of vertices (passed in as num\_vertices). The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
+The first method that we can use to calculate PageRank is the Iterative method. We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, where $M$ is our PageRank matrix generated from the graph, and $n$ is the number of vertices (passed in as num\_vertices). The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
 
 Our result of the iterative method is the vector $M^k (\frac{1}{n}\vec{1})$, where $k$ is the value passed in as num\_iterations.
 
@@ -174,12 +170,22 @@ end
 
 \end{enumerate}
 
+\textbf{HITS General Algorithm}
+
+The HITS algorithm is another algorithm that serves a similar purpose as PageRank, but provides more insight into the relationships between vertices in the directed graph. HITS assigns "hub" and "authority" scores to each of the vertices in the graph.
+
+
+\textbf{Output}
+
+For PageRank, the function print\_pagerank prints the Vertices with the top PageRank scores to standard output.
+
 \section{Results}
 
 Give a few examples of it running on our test cases and explain why the results are correct.
 
 \section{Discussion}
 
+Obstacles and design choices here
 
 \section{Conclusion}
 
