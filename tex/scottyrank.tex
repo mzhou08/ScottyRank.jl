@@ -134,11 +134,58 @@ vertices calculated from the user-provided graph.
 
 It takes the parameters \mintinline{julia}/graph/,
 which is the directed graph of vertices we will apply PageRank to,
-and \mintinline{julia}/damping/, which the the damping factor-- the assumed probability that a graph traveler will stop traveling on any given move.
+and \mintinline{julia}/damping/, which the the damping factor-- the assumed probability that a surfer will stop traveling on any given move.
 
 \subsubsection{PageRank Matrix Generation}
 
-The function \mintinline{julia}/pagerank_matrix/ generates a Markov Matrix that will be used in the PageRank algorithm.
+The function \mintinline{julia}/pagerank_matrix/ generates a Markov Matrix $M$ that will be used in the PageRank algorithm.
+
+To generate this matrix $M$, we iterate through all vertices of the graph.
+If the vertex $V$ has no outgoing neighbors (no outgoing edges),
+the surfer should continue surfing at a new random vertex $W$.
+So, there should be an equal probability that the surfer ends up at any other vertex $W$ in the graph.
+Thus, we add the value $\frac{1}{\text{\mintinline{julia}/num_vertices - 1/}}$
+to the matrix entries that represents the probability of the surfer ending up at
+any one of the remaining vertices $W$ from $V$, which are $M_{VW}$, coded as \mintinline{julia}/M[W, V]/.
+
+Otherwise, there should be an equal probability that our surfer goes to any one of the vertices $V_p$that the current vertex $V$ has directed edges towards.
+So for every one of the vertices $V_p$ that the current vertex $V$ points to,
+we add the reciprocal of the number of outgoing neighbors of the current vertex
+($\frac{1}{\text{\mintinline{julia}/num_out_neighbors/}}$) to the matrix entry representing the probability that we end up at $V_p$ from $V$,
+which is $M_{VV_p}$, coded as \mintinline{julia}/M[V_p, V]/,
+to represent the the aforementioned idea.
+
+Finally, we apply the damping factor to the matrix.
+Since the damping factor represents the probability that a surfer will continue surfing at any given vertex,
+we multiply the PageRank value of every entry in the matrix by the damping factor.
+Then, we must add the value $\frac{1-\text{\mintinline{julia}/damping/}}{\text{\mintinline{julia}/num_vertices/}-1}$ to each entry in the matrix.
+We add the previous fraction because if the surfer stops surfing at a given vertex $V$, 
+we want to continue calculating PageRank,
+so we assume the surfer picks back up at any vertex.
+Since there are \mintinline{julia}/num_vertices/ vertices,
+and the probability a surfer stops surfing at $V$ is \mintinline{julia}/1-damping/,
+we must add $\frac{1-\text{\mintinline{julia}/damping/}}{\text{\mintinline{julia}/num_vertices/}-1}$
+to each entry in the matrix.
+
+\begin{lstlisting}
+function pagerank_matrix(graph::Graph, damping::Float64)
+  M = zeros(Float64, (graph.num_vertices, graph.num_vertices))
+  for vertex in graph.vertices
+    num_out_neighbors = length(vertex.out_neighbors)
+    if num_out_neighbors == 0
+      for index_to in 1:graph.num_vertices
+        M[index_to, vertex.index] = 1 / (graph.num_vertices - 1)
+      end
+      M[vertex.index, vertex.index] = 0
+    else
+      for index_to in vertex.out_neighbors
+        M[index_to, vertex.index] = 1 / num_out_neighbors
+      end
+    end
+  end
+  map(x -> damping * x + (1 - damping) / graph.num_vertices, M)
+end
+\end{lstlisting}
 
 \subsubsection{PageRank General Algorithm}
 
@@ -152,7 +199,7 @@ then we apply either the iterative or epsilon method to calculate a resultant ma
 \item \mintinline{julia}/graph/: the user-defined graph
 
 \item \mintinline{julia}/damping/: the damping factor for PageRank. 
-This is the assumed probability that a graph traveler will stop traveling on any given move. Defaulted to 0.85
+This is the assumed probability that a surfer will stop traveling on any given move. Defaulted to 0.85
 
 \item \mintinline{julia}/modeparam/: the mode and the parameters for PageRank.
 Designates the calculation method we will use-- either \mintinline{julia}/"iter"/ for the iterative method or \mintinline{julia}/"epsi"/ for the epsilon method.
@@ -211,9 +258,9 @@ end
 \end{lstlisting}
 
 
-\subsection{HITS General Algorithm}
+\subsection{HITS Algorithm}
 
-The HITS algorithm is another algorithm that serves a similar purpose as PageRank,
+The HITS algorithm serves a similar purpose as PageRank,
 but provides more insight into the relationships between vertices in the directed graph.
 HITS assigns "hub" and "authority" scores to each of the vertices in the graph.
 
