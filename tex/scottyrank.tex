@@ -41,7 +41,7 @@
 
 \tableofcontents
 
-\section{Mathematical Background}
+\section{Background}
 
 \subsection{Linear Algebra}
 
@@ -123,7 +123,7 @@ For a simple directed graph with $n$ vertices and its adjacency matrix $\mathcal
 
 \section{Algorithms}
 
-\subsection{The network model}
+\subsection{The Network Model}
 
 Both algorithms, PageRank and HITS, model the network of interest as a simple directed graph with websites as vertices
 and links as edges.
@@ -317,23 +317,10 @@ Adjacency list files follow the following format:
 ...                                        # in total
 \end{minted}
 
-The code for \mintinline{julia}{read_edge_list} and \mintinline{julia}{read_adjacency_list} can be found in the
+The code for
+\mintinline{julia}{read_graph},
+\mintinline{julia}{read_edge_list}, and \mintinline{julia}{read_adjacency_list} can be found in the
 Appendix.
-
-\begin{minted}{julia}
-# export read_graph
-
-function read_graph(filepath::String;
-    filetype::String="el", zero_index::Bool=false)
-  if filetype == "el"
-    read_edge_list(filepath, zero_index)
-  elseif filetype == "al"
-    read_adjacency_list(filepath, zero_index)
-  else
-    error("invalid filetype")
-  end
-end
-\end{minted}
 
 \subsection{PageRank}
 
@@ -376,7 +363,7 @@ end
 \subsubsection{Running the transition process}
 
 The functions \mintinline{julia}{pagerank_iteration} and \mintinline{julia}{pagerank_epsilon} both generate
-an initial stochastic vector and the transition matrix and then carry out the transition process.
+an initial stochastic vector and then carry out the transition process using the transition matrix.
 
 \mintinline{julia}{pagerank_iteration} runs the process for a given number of iterations.
 
@@ -407,9 +394,11 @@ end
 We expose two functions to the client: \mintinline{julia}{pagerank} and \mintinline{julia}{pagerank_print}.
 
 \mintinline{julia}{pagerank} calculates the PageRank scores for the input \mintinline{julia}{graph},
-with the option to specify the damping factor and the type of transition process.
+with the option to specify the damping factor and the transition mode.
 
 \begin{minted}{julia}
+# export pagerank_print, pagerank
+
 function pagerank(graph::Graph;
     damping::Float64=0.85, modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
   if damping < 0 || damping > 1
@@ -437,110 +426,51 @@ vertices for the input \mintinline{julia}{graph} and scores \mintinline{julia}{p
 
 The code for \mintinline{julia}{pagerank_print} can be found in the Appendix.
 
-\subsection{HITS Algorithm}
+\subsection{HITS}
 
-The HITS algorithm serves a similar purpose as PageRank,
-but provides more insight into the relationships between vertices in the directed graph.
-HITS assigns "hub" and "authority" scores to each of the vertices in the graph.
+Similarly, we divide the HITS algorithm into three steps:
 
-A vertex $V$ has a high authority score if many other vertices point towards it,
-and a high hub score if it points towards many vertices with high authority scores.
+\begin{enumerate}
+  \item Generating the transition matrix: \mintinline{julia}{hits_matrix}.
+  \item Running the transition process: \mintinline{julia}{hits_update}, \mintinline{julia}{hits_iteration},
+    \mintinline{julia}{hits_epsilon}.
+  \item Returning the desired output: \mintinline{julia}{hits_print}, \mintinline{julia}{hits}.
+\end{enumerate}
 
-\subsubsection{HITS Matrix Pair Generation}
+\subsubsection{Generating the transition matrix}
 
-The function \mintinline{julia}/hits_matrices/ generates two matrices \mintinline{julia}/A/ and \mintinline{julia}/H/
-that are the authority and hub matrices, respectively.
-
-We generate these matrices, which resemble adjacency matrices, by iterating through all of the vertices.
-
-We construct the authority matrix \mintinline{julia}/A/ as follows.
-For each vertex $V$ in the graph, for each of the other vertices $V_p$ that $V$ points to
-(has an outgoing edge towards),
-we set the matrix entry corresponding to the edge from $V$ to $V_p$ to 1.
-This entry is coded as \mintinline{julia}/A[V_p, V]/.
-
-We construct the hub matrix \mintinline{julia}/H/ as follows.
-For each vertex $V$ in the graph, for each of the other vertices $V_f$ that point to $V$,
-we set the matrix entry corresponding to the edge from $V_f$ to $V$ to 1.
-This entry is coded as \mintinline{julia}/H[V_f, V]/.
+The transition matrices for the hits algorithm are simply the adjacency matrix and its transpose.
 
 \begin{minted}{julia}
-function hits_matrices(graph::Graph)
+function hits_matrix(graph::Graph)
   A = zeros(Float64, (graph.num_vertices, graph.num_vertices))
-  H = zeros(Float64, (graph.num_vertices, graph.num_vertices))
   for vertex in graph.vertices
     for index_to in vertex.out_neighbors
       A[index_to, vertex.index] = 1
     end
-    for index_from in vertex.in_neighbors
-      H[index_from, vertex.index] = 1
-    end
   end
-  A, H
+  A
 end
 \end{minted}
 
-\subsubsection{HITS General Algorithm}
+\subsubsection{Running the transition process}
 
-The function \mintinline{julia}/hits/ first finds the initial authority and hub HITS matrices
-for the user-provided graph,
-then applies either the iterative or the epsilon method to calculate
-two resultant vectors containing authority and hub scores, respectively.
-
-\mintinline{julia}/hits/ takes the following parameters:
-
-\begin{itemize}[label={}]
-\item \mintinline{julia}/graph/: the user-provided directed graph
-
-\item \mintinline{julia}/modeparam/: the mode and the parameters for HITS.
-Designates the calculation method we will use--
-either \mintinline{julia}/"iter"/ for the iterative method or \mintinline{julia}/"epsi"/ for the epsilon method.
-
-Iterative: \mintinline{julia}/modeparam = ("iter", num_iterations)/:
-HITS for a given number of iterations
-Epsilon: \mintinline{julia}/modeparam = ("epsi", epsilon)/: HITS until convergence of
-both Hub and Authority vectors with epsilon
-\end{itemize}
-
-\subsubsection{HITS - Updating Authority and Hub Scores}
-
-To update the authority and hub scores, we refer back to the idea of what causes those scores to increase--
-A vertex's authority score increases if the vertices pointing towards it have higher hub scores;
-and a vertex's hub score increases if the vertices it points towards have high authority scores.
-
-Thus, we have the concept behind HITS:
-Multiplying the hub scores vector by the authority matrix on the left gives us a new vector with the updated authority scores.
-This is because the product gives a vector where each component is the sum of the hub scores of the vertices that point to it.
-
-Similarly, multiplying the authority scores vector by the hub matrix on the left gives us the updated hub scores,
-because each component of the resultant vector is the sum of the authority scores of the vertices that the vertex in that component points towards.
-
-So to update the authority and hub scores, at every step we set the updated authority scores to the product of the authority matrix and current hub scores (coded as \mintinline{julia}/A*h/), and the updated hub scores to the product of the hub matrix and the current authority scores (coded as \mintinline{julia}/H*a/).
+The function \mintinline{julia}{hits_update} computes the normalized new Authority and Hub scores from the
+previous Authority and Hub scores and the two transition matrices
 
 \begin{minted}{julia}
-function hits_update(A::Matrix{Float64},
-  H::Matrix{Float64}, a::Vector{Float64}, h::Vector{Float64})
-
+function hits_update(A::Matrix{Float64}, H::Matrix{Float64}, a::Vector{Float64}, h::Vector{Float64})
   normalize(A * h), normalize(H * a)
 end
 \end{minted}
 
-\subsubsection{HITS - Iterative Method}
+The functions \mintinline{julia}{hits_iteration} and \mintinline{julia}{hits_epsilon}
+both generate the initial Authority and Hub scores and then carry out the transition process using the update function.
 
-The \mintinline{julia}/hits_iteration/ function calculates HITS with the iterative method.
-Its parameters are the number of vertices \mintinline{julia}/num_vertices/,
-the authority matrix \mintinline{julia}/A/, the hub matrix \mintinline{julia}/H/,
-and the number of iterations \mintinline{julia}/num_iterations/.
-
-We start with the authority and hub scores all set to the ones vector, with \mintinline{julia}/num_vertices/ components each.
-
-Next, we update the authority and hub vectors, which are \mintinline{julia}/a/ and \mintinline{julia}/h/ respectively,
-using the function \mintinline{julia}/hits_update/ at every step for \mintinline{julia}/num_iterations/ iterations, and return the resulting two vectors of authority and hub scores.
+\mintinline{julia}{hits_iteration} runs the process for a given number of iterations.
 
 \begin{minted}{julia}
-function hits_iteration(num_vertices::UInt32, A::Matrix{Float64},
-  H::Matrix{Float64}, num_iterations::UInt32)
-
+function hits_iteration(num_vertices::UInt32, A::Matrix{Float64}, H::Matrix{Float64}, num_iterations::UInt32)
   a, h = ones(Float64, num_vertices), ones(Float64, num_vertices)
   for _ in 1:num_iterations
     a, h = hits_update(A, H, a, h)
@@ -549,28 +479,18 @@ function hits_iteration(num_vertices::UInt32, A::Matrix{Float64},
 end
 \end{minted}
 
-
-\subsubsection{HITS - Epsilon Method}
-
-The \mintinline{julia}/hits_epsilon/ function calculates HITS with the epsilon method.
-Similar to \mintinline{julia}/hits_iteration/, its parameters are the number of vertices \mintinline{julia}/num_vertices/,
-the authority matrix \mintinline{julia}/A/, the hub matrix \mintinline{julia}/H/,
-and the convergence cutoff \mintinline{julia}/epsilon/.
-
-We start with the authority and hub scores all set to the ones vector, with \mintinline{julia}/num_vertices/ components each.
-
-Next, we repeatedly update the authority and hub vectors,
-which are \mintinline{julia}/a/ and \mintinline{julia}/h/ respectively,
-using the function \mintinline{julia}/hits_update/ at every step until
-the norm between the previous and updated authority scores is less than epsilon and
-the norm between the previous and updated hub scores is also less than epsilon.
-
-Finally, the resulting two vectors of authority and hub scores are returned.
+\mintinline{julia}{hits_epsilon} runs the process until the norms of both difference vectors are smaller than 
+the given threshold, or until
+$\left\lVert
+  \vec{a}_{k + 1} - \vec{a}_k
+\right\rVert < \epsilon
+\wedge
+\left\lVert
+  \vec{h}_{k + 1} - \vec{h}_k
+\right\rVert < \epsilon$.
 
 \begin{minted}{julia}
-function hits_epsilon(num_vertices::UInt32, A::Matrix{Float64},
-  H::Matrix{Float64}, epsilon::Float64)
-
+function hits_epsilon(num_vertices::UInt32, A::Matrix{Float64}, H::Matrix{Float64}, epsilon::Float64)
   prev_a, prev_h = ones(Float64, num_vertices), ones(Float64, num_vertices)
   curr_a, curr_h = hits_update(A, H, prev_a, prev_h)
   while norm(prev_a - curr_a) > epsilon || norm(prev_h - curr_h) > epsilon
@@ -580,83 +500,50 @@ function hits_epsilon(num_vertices::UInt32, A::Matrix{Float64},
 end
 \end{minted}
 
+\subsubsection{Returning the desired output}
+
+We expose two functions to the client: \mintinline{julia}{hits} and \mintinline{julia}{hits_print}
+
+\mintinline{julia}{hits} calculates the Authority and Hub scores for the input \mintinline{julia}{graph},
+with the option to specify the transition mode.
+
+\begin{minted}{julia}
+# export hits_print, hits
+
+function hits(graph::Graph;
+    modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
+  A = hits_matrix(graph)
+  H = copy(transpose(A))
+  if modeparam[1] == "iter"
+    if !(isinteger(modeparam[2])) || modeparam[2] < 0
+      error("invalid param")
+    end
+    hits_iteration(graph.num_vertices, A, H, UInt32(modeparam[2]))
+  elseif modeparam[1] == "epsi"
+    if modeparam[2] <= 0
+      error("invalid param")
+    end
+    hits_epsilon(graph.num_vertices, A, H, Float64(modeparam[2]))
+  else
+    error("invalid mode")
+  end
+end
+\end{minted}
+
+\mintinline{julia}{hits_print} pretty-prints the Authority and Hub scores along with relevant information
+about the top vertices for the input \mintinline{julia}{graph} and scores \mintinline{julia}{a} and \mintinline{julia}{h}.
+
+The code for \mintinline{julia}{hits_print} can be found in the Appendix.
+
 \subsection{Output}
 
-For PageRank, the function \mintinline{julia}/print_pagerank/ prints
-the Vertices with the top PageRank scores to standard output in an organized format.
+We offer two ways of exporting the \mintinline{julia}{graph} struct: \mintinline{julia}{generate_adjacency_matrix}
+and \mintinline{julia}{generate_adjacency_list}.
 
-The parameters for \mintinline{julia}/print_pagerank/ are:
+\mintinline{julia}{generate_adjacency_matrix}, well, generates the \mintinline{julia}{graph}'s adjacency matrix,
+with the option to specify whether the desired output should use 0-based indexing.
 
-\begin{itemize}[label={}]
-\item \mintinline{julia}/graph/: the graph
-
-\item \mintinline{julia}/pg/: the PageRank scores for the graph
-
-\item \mintinline{julia}/num_lines/: the number of vertices whose information is printed
-
-\item \mintinline{julia}/params/: the types of information printed in order. Options are as follows:
-
-\mintinline{julia}/index/: one-based index
-
-\mintinline{julia}/0ndex/: zero-based index
-
-\mintinline{julia}/val/: PageRank score, two digits after decimal
-
-\mintinline{julia}/vall/: PageRank score, four digits after decimal
-
-\mintinline{julia}/valll/: PageRank score, six digits after decimal
-
-\mintinline{julia}/in/: number of incoming neighbors
-
-\mintinline{julia}/out/: number of outgoing neighbors
-
-\end{itemize}
-
-For HITS, the function \mintinline{julia}/hits_print/ prints
-the Vertices with the top HITS authority and hub scores separately to standard output in
-an organized format.
-
-The parameters for \mintinline{julia}/hits_print/ are:
-
-\begin{itemize}[label={}]
-\item \mintinline{julia}/graph/: the graph
-
-\item \mintinline{julia}/a/: the Authority scores for the graph
-
-\item \mintinline{julia}/h/: the Hub scores for the graph
-
-\item \mintinline{julia}/num_lines/: the number of vertices whose information is printed
-
-\item \mintinline{julia}/params/: the types of information printed in order. Options are as follows:
-
-\mintinline{julia}/index/: one-based index
-
-\mintinline{julia}/0ndex/: zero-based index
-
-\mintinline{julia}/val/: Authority/Hub score, two digits after decimal
-
-\mintinline{julia}/vall/: Authority/Hub score, four digits after decimal
-
-\mintinline{julia}/valll/: Authority/Hub score, six digits after decimal
-
-\mintinline{julia}/in/: print number of incoming neighbors
-
-\mintinline{julia}/out/: print number of outgoing neighbors
-\end{itemize}
-
-\section{Results}
-
-Running this example on one of our test cases, we have
-
-% \includegraphics[h!,scale=2]{small_el-graph.png}
-%\section{Discussion}
-
-%Obstacles and design choices here
-
-%\section{Conclusion}
-
-\section{Code Appendix}
-
-ADD AT END
+The code for \mintinline{julia}{generate_adjacency_matrix} and \mintinline{julia}{generate_adjacency_list} and be
+found in the Appendix.
 
 \end{document}
