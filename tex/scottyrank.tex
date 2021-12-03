@@ -20,8 +20,6 @@
 \newcommand{\N}{\ensuremath{\mathbb N}}
 \newcommand{\C}{\ensuremath{\mathbb C}}
 
-\renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
-
 \hypersetup{
   colorlinks=true,
   linkcolor=Orchid,
@@ -29,6 +27,8 @@
 }
 
 \usemintedstyle{stata-dark}
+
+\raggedright
 
 \begin{document}
 
@@ -44,8 +44,30 @@
 
 \section{Mathematical Background}
 
-\subsection{The random walk model}
+\subsection{Definitions}
 
-Test test
+Positive matrices are defined as matrices with positive entries.
+
+Square matrices are defined as matrices with the same number of columns and rows.
+
+Markov matrices are defined as square matrices with nonnegatives entries and column sum $1$ across all of its columns.
+Note that for a $n\times n$ matrix $M$, the latter condition is equivalent to $M^T\vec{1} = \vec{1}$,
+where $\vec{1}\in\R^n$ has all ones as components.
+
+Positive Markov matrices are defined as, well, positive Markov matrices.
+
+\subsection{Properties}
+
+
+(Perron-Frobenius Theorem)
+Let $A$ be a positive square matrix.
+Then $A$ has an eigenvalue $\lambda_0$ such that all other 
+
+
+
+
+
+
+
 
 \end{document}
