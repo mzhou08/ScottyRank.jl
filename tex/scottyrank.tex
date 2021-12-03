@@ -7,14 +7,15 @@
 \usepackage[dvipsnames]{xcolor}
 \usepackage{parskip}
 \usepackage{esvect}
-\usepackage{minted}
 \usepackage{graphicx}
+\usepackage{minted}
 \usepackage{hyperref}
 
 \newcommand{\R}{\ensuremath{\mathbb R}}
 \newcommand{\Z}{\ensuremath{\mathbb Z}}
 \newcommand{\N}{\ensuremath{\mathbb N}}
 
+\graphicspath{{../img/}}
 \setminted{linenos, breaklines}
 \hypersetup{
   colorlinks=true,
@@ -547,145 +548,133 @@ with the option to specify whether the desired output should use 0-based indexin
 The code for \mintinline{julia}{generate_adjacency_matrix} and \mintinline{julia}{generate_adjacency_list} and be
 found in the Appendix.
 
-\section{Results}
+\section{Example}
 
-Shown below is a recreation of the medium-sized network with 11 vertices displayed in
-the Wikipedia article on PageRank:
+Shown below is a recreation of the medium-sized network with 11 websites displayed in
+the Wikipedia article on PageRank.
+We will run both PageRank and HITS on this network.
 
-\includegraphics[width=\textwidth]{Wikipedia_Medium-graph.png}
+\begin{center}
+  \includegraphics[scale = 0.4]{wikipedia.png}
+\end{center}
 
-We will run both PageRank and HITS on the network above.
 
 \subsection{PageRank}
 
-We expect vertices B and C to have the highest PageRank scores
-because virtually every vertices points to it, either directly or through other vertices such as E.
-We also expect E to have a fairly high PageRank score because there are many nodes pointing to it;
-hoever, E points to B but B does not point to E, so E should have a lower PageRank than B.
-Furthermore, we expect the vertices G, H, I, J, and K to have the lowest PageRank scores because
-no vertices point towards them, and they only have edges pointing outwards.
-Their PageRank scores should also be roughly equal since they each have a similar outgoing edge structure,
-only pointing to 1 or 2 other vertices.
+\subsubsection{Expectations}
 
-We run the following commands to apply PageRank on the graph.
+We expect websites B and C to have the highest PageRank scores
+because virtually every website links to it, either directly or through other websites such as E.
 
-\begin{minted}{julia}
+We also expect E to have a fairly high PageRank score because there are many websites linking to it.
+
+Finally, we expect websites G, H, I, J, and K to have the lowest PageRank scores because they only have outgoing links.
+
+\subsubsection{Results}
+
+We run the following commands to apply PageRank on the network.
+
+\begin{minted}[linenos=false]{julia}
 $ julia
 julia> using ScottyRank
-julia> G=read_graph("data/medium-el.txt", "el") # the graph is stored as an edge list
-julia> pg = pagerank(G) # run PageRank on the graph
+julia> G = read_graph("data/medium-el.txt", filetype = "el")
+julia> pg = pagerank(G, modeparam=("epsi", 0.01))
 julia> pagerank_print(G, pg, num_lines=11)
+ - -  vall | - - index | - -    in | - -   out |
+--- pagerank ---
+    0.3824 |         2 |         7 |         1 | # B
+    0.3467 |         3 |         1 |         1 | # C
+    0.0811 |         5 |         6 |         3 | # E
+    0.0392 |         4 |         1 |         2 | # D
+    0.0392 |         6 |         1 |         2 | # F
+    0.0303 |         1 |         1 |         0 | # A
+    0.0162 |         7 |         0 |         2 | # G
+    0.0162 |         8 |         0 |         2 | # H
+    0.0162 |         9 |         0 |         2 | # I
+    0.0162 |        10 |         0 |         1 | # J
+    0.0162 |        11 |         0 |         1 | # K
 \end{minted}
-
-The printed result for \mintinline{julia}{pagerank_print} is shown below:
-
-\begin{table}[h]
-\begin{tabular}{lllll}
-PageRank Score & Index & Vertex & In & Out\\
-    0.3643 &        2 &         B& 7 &         1 \\
-    0.3638 &         3 &         C& 1 &         1 \\
-    0.0813 &         5 &         E& 6 &         3 \\
-    0.0395 &         4 &         D& 1 &         2 \\
-    0.0395 &         6 &         F& 1 &         2 \\
-    0.0304 &         1 &         A& 1 &         0 \\
-    0.0163 &         9 &         I& 0 &         2 \\
-    0.0163 &        10 &         J& 0 &         1 \\
-    0.0163 &        11 &         K& 0 &         1 \\
-    0.0163 &         7 &         G& 0 &         2 \\
-    0.0163 &         8 &         H& 0 &          2\\
-\end{tabular}
-\end{table}
 
 The first column lists the calculated PageRank score and
-the second lists the index of the vertex with that score.
-The third, titled ``Vertex", is the letter assigned to that vertex (A for index 1, B for index 2, etc.).
-The ``In" column displays the number of inbound edges to the corresponding vertex.
-Similarly, the ``Out" columns displays the number of outbound edges from the corresponding vertex.
+the second lists the index of the website with that score.
+The ``in'' column displays the number of incoming links to the corresponding website.
+Similarly, the ``out'' column displays the number of outgoing edges from the corresponding website.
 
-We see that, as expected, vertices B and C have the highest PageRank scores by far,
-and E has the highest score of the remaining vertices.
-Additionally, we see the vertices G, H, I, and J share the same lowest PageRank score of 0.0163.
+We see that, as expected, websites B and C have the highest PageRank scores by far,
+and E has the highest score of the remaining websites.
+Additionally, we see the websites G, H, I, J, and K share the same lowest PageRank score.
 
-\subsection{HITS on Medium-Sized Graph}
+\subsection{HITS}
 
-When predicting the results for HITS on the graph, we must recall the concepts behind HITS, namely
-that a vertex pointing to vertices with high authority scores will have a high hub score,
-and that a vertex which has vertices with high hub scores pointing to it will have a high authority score.
+\subsubsection{Expectations}
 
-With this in mind, we see that vertices B and E should have the highest authority scores
-simply because they have the greatest amount of vertices pointing towards them.
+Recall the core concept of HITS:
+websites linked by websites with high Hub scores will have high Authority scores;
+websites linking to websites with high Authority scores will have high Hub scores.
 
-However, since B does not point towards many other authorities, its hub score should be low.
-But E points to B, which is a high authority score vertex, so we should expect 
-the hub score of E to be above average.
+With this in mind, we expect that websites B and E to have the highest Authority scores
+simply because they have the greatest number of websites linking to them.
 
-Similarly, the hub score of C should be relatively high since it points to B, but the authority score of C should be low because B does not have a high hub score.
+However, since B does not link towards many other Authorities, its Hub score should be low.
+But E links to B, which has a high Authority score, so we expect the Hub score of E to be above average.
 
-Finally, we should expect the authority scores of G, H, I, J, and K all to be very low
-because no vertices point towards them,
-but their hub scores to be relatively high because they point to
-one or both of the highest authority nodes-- B and E.
+Similarly, the Hub score of C should be relatively high since it links to B, but the Authority score of
+C should be low because B does not have a high Hub score.
 
-We run the following commands to apply HITS on the graph.
+Finally, we expect the Authority scores of G, H, I, J, and K all to be very low
+because no websites link towards them.
+However, their Hub scores should be relatively high because they point to
+one or both of the highest Authority websites, namely B and E.
 
-\begin{minted}{julia}
+\subsubsection{Results}
+
+We run the following commands to apply HITS on the network.
+
+\begin{minted}[linenos=false]{julia}
 $ julia
 julia> using ScottyRank
-julia> G=read_graph("data/medium-el.txt", "el") # the graph is stored as an edge list
-julia> a,h = hits(G) # run HITS on the graph
+julia> G = read_graph("data/medium-el.txt", filetype = "el")
+julia> a, h = hits(G, modeparam=("epsi", 0.01))
 julia> hits_print(G, a, h, num_lines=11)
+ - -  vall | - - index | - -    in | - -   out |
+--- authority ---
+    0.7567 |         2 |         7 |         1 | # B
+    0.6370 |         5 |         6 |         3 | # E
+    0.0880 |         4 |         1 |         2 | # D
+    0.0880 |         6 |         1 |         2 | # F
+    0.0784 |         1 |         1 |         0 | # A
+    0.0000 |         3 |         1 |         1 | # C
+    0.0000 |         7 |         0 |         2 | # G
+    0.0000 |         8 |         0 |         2 | # H
+    0.0000 |         9 |         0 |         2 | # I
+    0.0000 |        10 |         0 |         1 | # J
+    0.0000 |        11 |         0 |         1 | # K
+--- hub ---
+    0.4259 |         6 |         1 |         2 | # F
+    0.4259 |         7 |         0 |         2 | # G
+    0.4259 |         8 |         0 |         2 | # H
+    0.4259 |         9 |         0 |         2 | # I
+    0.2836 |         5 |         6 |         3 | # E
+    0.2544 |         4 |         1 |         2 | # D
+    0.2306 |         3 |         1 |         1 | # C
+    0.1952 |        10 |         0 |         1 | # J
+    0.1952 |        11 |         0 |         1 | # K
+    0.0000 |         2 |         7 |         1 | # B
+    0.0000 |         1 |         1 |         0 | # A
 \end{minted}
 
-The printed result for \mintinline{julia}{hits_print} is shown below:
+Similar to \mintinline{julia}{pagerank_print}, the first column
+of the first table lists the Authority score
+and the first column of the second table lists the Hub scores.
+The ``in'' column displays the number of incoming links to the corresponding website,
+and the ``out'' column displays the number of outgoing edges from the corresponding website.
 
-\begin{table}[h]
-\begin{tabular}{lllll}
-Authority Score & Index & Vertex & In & Out\\
-    0.7554 &         2 &         B& 7 &         1 \\
-    0.6388 &         5 &         E & 6 &         3 \\
-    0.0870 &         4 &         D & 1 &         2 \\
-    0.0870 &         6 &         F & 1 &         2 \\
-    0.0779 &         1 &         A & 1 &         0 \\
-    0.0000 &         3 &         C & 1 &         1 \\
-    0.0000 &         7 &         G & 0 &         2 \\
-    0.0000 &         8 &         H & 0 &         2 \\
-    0.0000 &         9 &         I & 0 &         2 \\
-    0.0000 &        10 &        J & 0 &         1 \\
-    0.0000 &        11 &        K & 0 &         1 \\
-\end{tabular}
-\end{table}
+As expected, the Authority scores of B and E are the highest, with C having a low Authority score.
+The vertices G, H, I, J, and K have Authority scores of 0 because no vertices point to them.
 
-\begin{table}[h]
-\begin{tabular}{lllll}
-Hub Score & Index & Vertex & In & Out\\
-    0.4259 &         6 &        F & 1 &         2 \\
-    0.4259 &         7 &        G & 0 &         2 \\
-    0.4259 &         8 &        H & 0 &         2 \\
-    0.4259 &         9 &        I & 0 &         2 \\
-    0.2835 &         5 &        E & 6 &         3 \\
-    0.2543 &         4 &        D & 1 &         2 \\
-    0.2306 &         3 &        C & 1 &         1 \\
-    0.1953 &        10 &       J & 0 &         1 \\
-    0.1953 &        11 &       K & 0 &         1 \\
-    0.0000 &         2 &        B & 7 &         1 \\
-    0.0000 &         1 &        A & 1 &         0 \\
-\end{tabular}
-\end{table}
-
-Like PageRank, the first column lists the calculated
-authority score for the first table and the hub score for the second table.
-The second column lists the index of the vertex with that score.
-The third, titled ``Vertex", is the letter assigned to that vertex (A for index 1, B for index 2, etc.).
-The ``In" column displays the number of inbound edges to the corresponding vertex.
-Similarly, the ``Out" columns displays the number of outbound edges from the corresponding vertex.
-
-As predicted, the authority scores of B and E are the highest, with C having a low authority score.
-The vertices G, H, I, J, and K have authority scores of 0 because no vertices point to them.
-
-Additionally, we see that the hub scores were also calculated as predicted--
-the hub score of F was the highest because F pointed towards both B and E,
-the two vertices with the highest authority scores. As justified in our predictions, G, H, I
-have very high hub scores. However, J and K had lower hub scores because they only pointed to one of the main authorities.
-
+Furthermore, we see that the Hub scores are also calculated as predicted:
+the Hub score of F is the highest because F links towards both B and E,
+the two vertices with the highest authority scores. G, H, I also
+have very high Hub scores. However, J and K have lower Hub scores because they only link to one of the main Authorities.
 
 \end{document}
