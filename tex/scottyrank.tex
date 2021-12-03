@@ -751,6 +751,31 @@ julia> a,h = hits(G) # run HITS on the graph
 julia> hits_print(G, a, h, num_lines=11)
 \end{minted}
 
+The printed result for \mintinline{julia}{hits_print} is shown below:
+
+\begin{table}[h]
+\begin{tabular}{lllll}
+Authority Score & Index & Vertex & In & Out\\
+    0.7554 &         2 &         B& 7 &         1 \\
+    0.6388 &         5 &         E & 6 &         3 \\
+    0.0870 &         4 &         D & 1 &         2 \\
+    0.0870 &         6 &         F & 1 &         2 \\
+    0.0779 &         1 &         A & 1 &         0 \\
+    0.0000 &         3 &         C & 1 &         1 \\
+    0.0000 &         7 &         G & 0 &         2 \\
+    0.0000 &         8 &         H & 0 &         2 \\
+    0.0000 &         9 &         I & 0 &         2 \\
+    0.0000 &        10 &        J & 0 &         1 \\
+    0.0000 &        11 &        K & 0 &         1 \\
+\end{tabular}
+\end{table}
+
+The first column lists the calculated PageRank score and
+the second lists the index of the vertex with that score.
+The third, titled ``Vertex", is the letter assigned to that vertex (A for index 1, B for index 2, etc.).
+The ``In" column displays the number of inbound edges to the corresponding vertex.
+Similarly, the ``Out" columns displays the number of outbound edges from the corresponding vertex.
+
 %\section{Discussion}
 
 %Obstacles and design choices here
