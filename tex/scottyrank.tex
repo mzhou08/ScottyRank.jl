@@ -12,6 +12,7 @@
 \usepackage{tikz}
 \usepackage{listings}
 \usepackage{lipsum}
+\usepackage{esvect}
 \usepackage{minted}
 \usepackage{hyperref}
 
@@ -208,40 +209,50 @@ attracting state.
 
 \subsubsection{Authorities and hubs}
 
-filler
-
 \subsubsection{Matrix representation}
 
-filler
+Let $n$ be the number of websites in the network of interest.
+Let $\mathcal{A}$ be the adjacency matrix for the network of interest.
+Let $\langle\vec{a}_t\rangle_{t\in\N}$ and $\langle\vec{h}_t\rangle_{t\in\N}$ be the (pre-normalized) authority and hub
+scores for the $n$ websites at time $t$.
 
-\begin{minted}{julia}
-# export read_graph
+Then $\vec{a}_0 = \vec{h}_0 = \vec{1}$ and
+\[
+  (\forall t\in\N)
+  \left[
+    \left(\vec{a}_{t + 1}, \vec{h}_{t + 1}\right) = \left(\mathcal{A}\vec{h}_t, \mathcal{A}^T\vec{a}_t\right)
+  \right].
+\]
 
-"""
-    read_graph(filepath::String="data/medium-el.txt"); filetype::String="el", zero_index::Bool=false) -> Graph
+\subsubsection{Definition} The Authority and Hub scores for a given website in the network of interest is defined
+as the scores after indefinitely many iterations.
+In matrix form,
+\[
+  (\forall i\in[n])
+  \left[
+    \left(\mathrm{Authority}(i), \mathrm{Hub}(i)\right) =
+    \lim_{t\to\infty}
+    \left((\vec{a}_t)_i, (\vec{h}_t)_i\right)
+  \right].
+\]
 
-Reads a graph from an edge list/adjacency list file
-
-# Arguments
-- `filepath::String="data/medium-el.txt"`: the path to the source file (default: Wikipedia PageRank graph)
-
-# Keywords
-- `filetype::String="el"`: "el" for edge list, "al" for adjacency list
-- `zero_index::Bool=false`: whether the input file is zero-based
-
-# Returns
-- `Graph`: the graph from the source file
-"""
-function read_graph(filepath::String="data/medium-el.txt";
-    filetype::String="el", zero_index::Bool=false)
-  if filetype == "el"
-    read_edge_list(filepath, zero_index)
-  elseif filetype == "al"
-    read_adjacency_list(filepath, zero_index)
-  else
-    error("invalid filetype")
-  end
-end
-\end{minted}
+To guarantee convergence, the Authority and Hub scores are usually normalized.
+In our implementation, normalization is performed after every iteration.
+This means
+\[
+  (\forall t\in\N)
+  \left[
+    \lVert(\vec{a}_t)'\rVert = \lVert(\vec{h}_t)'\rVert = 1
+  \right]
+\]
+where
+\[
+  (\forall t\in\N)
+  \left[
+    (\vec{a}_t)' = \frac{\vec{a}_t}{\lVert\vec{a}_t\rVert}
+    \wedge
+    (\vec{h}_t)' = \frac{\vec{h}_t}{\lVert\vec{h}_t\rVert}
+  \right].
+\]
 
 \end{document}

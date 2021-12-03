@@ -359,7 +359,8 @@ Computes Hub and Authority scores (HITS) for the graph
 """
 function hits(graph::Graph;
     modeparam::Tuple{String, Union{Int64, UInt32, Float64}}=("iter", 10))
-  A, H = hits_matrices(graph)
+  A = hits_matrix(graph)
+  H = copy(transpose(A))
   if modeparam[1] == "iter"
     if !(isinteger(modeparam[2])) || modeparam[2] < 0
       error("invalid param")
@@ -396,18 +397,14 @@ function hits_update(A::Matrix{Float64}, H::Matrix{Float64}, a::Vector{Float64},
   normalize(A * h), normalize(H * a)
 end
 
-function hits_matrices(graph::Graph)
+function hits_matrix(graph::Graph)
   A = zeros(Float64, (graph.num_vertices, graph.num_vertices))
-  H = zeros(Float64, (graph.num_vertices, graph.num_vertices))
   for vertex in graph.vertices
     for index_to in vertex.out_neighbors
       A[index_to, vertex.index] = 1
     end
-    for index_from in vertex.in_neighbors
-      H[index_from, vertex.index] = 1
-    end
   end
-  A, H
+  A
 end
 
 # export generate_adjacency_matrix, generate_adjacency_list
@@ -426,7 +423,7 @@ Generates the adjacency matrix representation for the graph
 function generate_adjacency_matrix(graph::Graph)
   AM = zeros(Bool, (graph.num_vertices, graph.num_vertices))
   for vertex in graph.vertices, index_to in vertex.out_neighbors
-    AM[vertex.index, index_to] = true
+    AM[vertex.index_to, vertex.index] = true
   end
   AM
 end
