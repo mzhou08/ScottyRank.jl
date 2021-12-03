@@ -152,11 +152,11 @@ Otherwise, there should be an equal probability that our surfer goes to any one 
 So for every one of the vertices $V_p$ that the current vertex $V$ points to,
 we add the reciprocal of the number of outgoing neighbors of the current vertex
 ($\frac{1}{\text{\mintinline{julia}/num_out_neighbors/}}$) to the matrix entry representing the probability that we end up at $V_p$ from $V$,
-which is $M_{VV_p}$, coded as \mintinline{julia}/M[V_p, V]/,
+which is 
 to represent the the aforementioned idea.
 
 Finally, we apply the damping factor to the matrix.
-Since the damping factor represents the probability that a surfer will continue surfing at any given vertex,
+Since the damping factor represents the probability that a su$M_{VV_p}$, coded as \mintinline{julia}/M[V_p, V]/,rfer will continue surfing at any given vertex,
 we multiply the PageRank value of every entry in the matrix by the damping factor.
 Then, we must add the value $\frac{1-\text{\mintinline{julia}/damping/}}{\text{\mintinline{julia}/num_vertices/}-1}$ to each entry in the matrix.
 We add the previous fraction because if the surfer stops surfing at a given vertex $V$, 
@@ -275,6 +275,17 @@ that are the authority and hub matrices, respectively.
 
 We generate these matrices, which resemble adjacency matrices, by iterating through all of the vertices.
 
+We construct the authority matrix \mintinline{julia}/A/ as follows.
+For each vertex $V$ in the graph, for each of the other vertices $V_p$ that $V$ points to
+(has an outgoing edge towards),
+we set the matrix entry corresponding to the edge from $V$ to $V_p$ to 1.
+This entry is coded as \mintinline{julia}/A[V_p, V]/.
+
+We construct the hub matrix \mintinline{julia}/H/ as follows.
+For each vertex $V$ in the graph, for each of the other vertices $V_f$ that point to $V$,
+we set the matrix entry corresponding to the edge from $V_f$ to $V$ to 1.
+This entry is coded as \mintinline{julia}/H[V_f, V]/.
+
 \begin{minted}{julia}
 function hits_matrices(graph::Graph)
   A = zeros(Float64, (graph.num_vertices, graph.num_vertices))
@@ -312,6 +323,10 @@ HITS for a given number of iterations
 Epsilon: \mintinline{julia}/modeparam = ("epsi", epsilon)/: HITS until convergence of
 both Hub and Authority vectors with epsilon
 \end{itemize}
+
+\subsubsection{HITS - Updating Authority and Hub Scores}
+
+
 
 \subsubsection{HITS - Iterative Method}
 
