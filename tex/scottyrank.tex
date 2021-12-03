@@ -732,13 +732,13 @@ simply because they have the greatest amount of vertices pointing towards them.
 
 However, since B does not point towards many other authorities, its hub score should be low.
 But E points to B, which is a high authority score vertex, so we should expect 
-the hub score of E to be high.
+the hub score of E to be above average.
 
 Similarly, the hub score of C should be relatively high since it points to B, but the authority score of C should be low because B does not have a high hub score.
 
 Finally, we should expect the authority scores of G, H, I, J, and K all to be very low
 because no vertices point towards them,
-but their hub scores to be above average because they point to
+but their hub scores to be relatively high because they point to
 one or both of the highest authority nodes-- B and E.
 
 We run the following commands to apply HITS on the graph.
@@ -767,6 +767,23 @@ Authority Score & Index & Vertex & In & Out\\
     0.0000 &         9 &         I & 0 &         2 \\
     0.0000 &        10 &        J & 0 &         1 \\
     0.0000 &        11 &        K & 0 &         1 \\
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\begin{tabular}{lllll}
+Hub Score & Index & Vertex & In & Out\\
+    0.4259 &         6 &        F & 1 &         2 \\
+    0.4259 &         7 &        G & 0 &         2 \\
+    0.4259 &         8 &        H & 0 &         2 \\
+    0.4259 &         9 &        I & 0 &         2 \\
+    0.2835 &         5 &        E & 6 &         3 \\
+    0.2543 &         4 &        D & 1 &         2 \\
+    0.2306 &         3 &        C & 1 &         1 \\
+    0.1953 &        10 &       J & 0 &         1 \\
+    0.1953 &        11 &       K & 0 &         1 \\
+    0.0000 &         2 &        B & 7 &         1 \\
+    0.0000 &         1 &        A & 1 &         0 \\
 \end{tabular}
 \end{table}
 
