@@ -666,14 +666,16 @@ The parameters for \mintinline{julia}/hits_print/ are:
 
 \section{Results}
 
-The below graph is a recreation of the medium-sized graph with 11 vertices
-found in the Wikipedia article on PageRank:
+Shown below is a recreation of the medium-sized network with 11 vertices displayed in
+the Wikipedia article on PageRank:
 
 \includegraphics[width=\textwidth]{Wikipedia_Medium-graph.png}
 
-\subsection{PageRank on Medium-Sized Graph}
+We will run both PageRank and HITS on the network above.
 
-As shown in the figure, we expect vertices B and C to have the highest PageRank scores
+\subsection{PageRank}
+
+We expect vertices B and C to have the highest PageRank scores
 because virtually every vertices points to it, either directly or through other vertices such as E.
 We also expect E to have a fairly high PageRank score because there are many nodes pointing to it;
 hoever, E points to B but B does not point to E, so E should have a lower PageRank than B.
@@ -687,7 +689,7 @@ We run the following commands to apply PageRank on the graph.
 \begin{minted}{julia}
 $ julia
 julia> using ScottyRank
-julia> G=read_graph("data/medium-el.txt", "el") # the graph is stored as an edge list
+julia> G=read_graph("data/medium-el.txt", filetype="el") # the graph is stored as an edge list
 julia> pg = pagerank(G) # run PageRank on the graph
 julia> pagerank_print(G, pg, num_lines=11)
 \end{minted}
@@ -746,7 +748,7 @@ We run the following commands to apply HITS on the graph.
 \begin{minted}{julia}
 $ julia
 julia> using ScottyRank
-julia> G=read_graph("data/medium-el.txt", "el") # the graph is stored as an edge list
+julia> G=read_graph("data/medium-el.txt", filetype="el") # the graph is stored as an edge list
 julia> a,h = hits(G) # run HITS on the graph
 julia> hits_print(G, a, h, num_lines=11)
 \end{minted}
