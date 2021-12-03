@@ -61,10 +61,7 @@ In our project, we implemented both the PageRank and HITS algorithms using Julia
 
 \maketitle
 
-\tableofcontents
-
-\section{Introduction}
-
+%\tableofcontents
 
 \section{Mathematical Background}
 
@@ -77,9 +74,12 @@ Markov Matrices are square matrices with strictly non-negative entries where the
 
 In our PageRank implementation, our Markov Matrices are not positive (all entries positive) because we are doing random walks, which assume that at every step, there is a 0 probability that our marker stays at the current node.
 
+
+\clearpage
+
 \section{Algorithms and Computations}
 
-\textbf{Custom Structs}
+\subsection{Custom Structs}
 
 We defined the structs Vertex and Graph to be used in our PageRank algorithms. Vertices were defined as structs with an unsigned integer index, a list of indices of vertices that have directed edges pointing towards V, and a list of indices of vertices that V has directed edges pointing towards, as shown in the code segment below. 
 
@@ -100,7 +100,7 @@ struct Graph
 end
 \end{minted}
 
-\textbf{Reading Graphs and Vertices from Files}
+\subsection{Reading Graphs and Vertices from Files}
 
 The functions read\_graph, read\_edge\_list, and read\_adjacency\_list are used to read and construct graphs from text files.
 
@@ -124,15 +124,17 @@ The format for an adjacency list input file is as follows:
 ...
 \end{lstlisting}
 
-\textbf{PageRank Matrix Generation}
+\subsection{PageRank Matrix Generation}
 
-In our general PageRank algorithm, we will use the PageRank matrix generated from the graph $G$.
+The function pagerank\_matrix generates a Markov Matrix that will be used in the PageRank algorith,.
 
 \textbf{PageRank General Algorithm}
 
-\begin{enumerate}
+In our general PageRank algorithm, we will use the PageRank matrix generated from the graph $G$.
 
-\item \textbf{PageRank - Iterative Variation}
+
+
+\subsubsection{PageRank - Iterative Variation}
 
 The first method that we can use to calculate PageRank is the Iterative method. We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, where $M$ is our PageRank matrix generated from the graph, and $n$ is the number of vertices (passed in as num\_vertices). The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
 
@@ -148,7 +150,7 @@ end
 \end{minted}
 
 
-\item \textbf{Pagerank - Epsilon Variation}
+ \subsubsection{Pagerank - Epsilon Variation}
 
 In the Epsilon method of our PageRank calculations (pagerank\_epsilon), similar to the Iterative method, we start with the expression $M(\frac{1}{n}\vec{1}) = M(\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, where $M$ is our PageRank matrix generated from the graph, and $n$ is the number of vertices (passed in as num\_vertices). The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
 
@@ -167,26 +169,24 @@ function pagerank_epsilon(num_vertices::UInt32,
 end
 \end{lstlisting}
 
-\end{enumerate}
 
-\textbf{HITS General Algorithm}
+\subsection{HITS General Algorithm}
 
 The HITS algorithm is another algorithm that serves a similar purpose as PageRank, but provides more insight into the relationships between vertices in the directed graph. HITS assigns "hub" and "authority" scores to each of the vertices in the graph.
 
 
-\textbf{Output}
+\subsection{Output}
 
 For PageRank, the function print\_pagerank prints the Vertices with the top PageRank scores to standard output.
 
-\section{Results}
+%\section{Results}
 
-Give a few examples of it running on our test cases and explain why the results are correct.
+%Give a few examples of it running on our test cases and explain why the results are correct.
 
-\section{Discussion}
+%\section{Discussion}
 
-Obstacles and design choices here
+%Obstacles and design choices here
 
-\section{Conclusion}
-
+%\section{Conclusion}
 
 \end{document}
