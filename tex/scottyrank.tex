@@ -326,7 +326,24 @@ both Hub and Authority vectors with epsilon
 
 \subsubsection{HITS - Updating Authority and Hub Scores}
 
+To update the authority and hub scores, we refer back to the idea of what causes those scores to increase--
+A vertex's authority score increases if the vertices pointing towards it have higher hub scores;
+and a vertex's hub score increases if the vertices it points towards have high authority scores.
 
+Thus, we have the concept behind HITS:
+Multiplying the hub scores vector by the authority matrix on the left gives us a new vector with the updated authority scores.
+This is because the product gives a vector where each component is the sum of the hub scores of the vertices that point to it.
+
+Similarly, multiplying the authority scores vector by the hub matrix on the left gives us the updated hub scores,
+because each component of the resultant vector is the sum of the authority scores of the vertices that the vertex in that component points towards.
+
+So to update the authority and hub scores, at every step we set the updated authority scores to the product of the authority matrix and current hub scores (coded as \mintinline{julia}/A*h/), and the updated hub scores to the product of the hub matrix and the current authority scores (coded as \mintinline{julia}/H*a/).
+
+\begin{minted}{julia}
+function hits_update(A::Matrix{Float64}, H::Matrix{Float64}, a::Vector{Float64}, h::Vector{Float64})
+  normalize(A * h), normalize(H * a)
+end
+\end{minted}
 
 \subsubsection{HITS - Iterative Method}
 
