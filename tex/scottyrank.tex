@@ -410,7 +410,30 @@ the Vertices with the top PageRank scores to standard output in an organized for
 
 The parameters for \mintinline{julia}/print_pagerank/ are:
 
+\begin{itemize}[label={}]
+\item \mintinline{julia}/graph/: the graph
 
+\item \mintinline{julia}/pg/: the PageRank scores for the graph
+
+\item \mintinline{julia}/num_lines/: the number of vertices whose information is printed
+
+\item \mintinline{julia}/params/: the types of information printed in order. Options are as follows:
+
+\mintinline{julia}/index/: one-based index
+
+\mintinline{julia}/0ndex/: zero-based index
+
+\mintinline{julia}/val/: PageRank score, two digits after decimal
+
+\mintinline{julia}/vall/: PageRank score, four digits after decimal
+
+\mintinline{julia}/valll/: PageRank score, six digits after decimal
+
+\mintinline{julia}/in/: number of incoming neighbors
+
+\mintinline{julia}/out/: number of outgoing neighbors
+
+\end{itemize}
 
 For HITS, the function \mintinline{julia}/hits_print/ prints
 the Vertices with the top HITS authority and hub scores separately to standard output in
@@ -418,7 +441,7 @@ an organized format.
 
 The parameters for \mintinline{julia}/hits_print/ are:
 
-\begin{itermize}
+\begin{itemize}[label={}]
 \item \mintinline{julia}/graph/: the graph
 
 \item \mintinline{julia}/a/: the Authority scores for the graph
@@ -427,7 +450,7 @@ The parameters for \mintinline{julia}/hits_print/ are:
 
 \item \mintinline{julia}/num_lines/: the number of vertices whose information is printed
 
-\item \mintinline{julia}/params: the types of information printed in order. Options are as follows:
+\item \mintinline{julia}/params/: the types of information printed in order. Options are as follows:
 
 \mintinline{julia}/index/: one-based index
 
