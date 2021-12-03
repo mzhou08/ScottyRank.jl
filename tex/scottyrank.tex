@@ -3,48 +3,29 @@
 \usepackage[a4paper, margin=1in]{geometry}
 \usepackage{amsmath}
 \usepackage[foot]{amsaddr}
-\usepackage{amssymb}
-\usepackage{amsthm}
 \usepackage{enumitem}
 \usepackage[dvipsnames]{xcolor}
-\usepackage{hyperref}
 \usepackage{parskip}
-\usepackage{graphicx}
-\usepackage{tikz}
-\usepackage{listings}
-\usepackage{lipsum}
-\usepackage[cache=false]{minted}
-% \usepackage{microtype}
-% WILL TIDY UP PACKAGES LATER
+\usepackage{esvect}
+\usepackage{minted}
+\usepackage{hyperref}
 
 \newcommand{\R}{\ensuremath{\mathbb R}}
 \newcommand{\Z}{\ensuremath{\mathbb Z}}
 \newcommand{\N}{\ensuremath{\mathbb N}}
-\newcommand{\F}{\ensuremath{\mathbb F}}
-\newcommand{\C}{\ensuremath{\mathbb C}}
 
-\renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
-\newcommand{\norm}[1]{\ensuremath{\lVert #1\rVert}}
-\newcommand{\std}[1]{\ensuremath{\frac{#1}{\norm{#1}}}}
-\newcommand{\proj}[2]{\ensuremath{\mathrm{proj}_{#1}{#2}}}
-
-\theoremstyle{remark}
-  \newtheorem*{cl}{Claim}
-  \newtheorem*{pf}{Proof}
-
-\setenumerate{label=(\alph*)}
-
+\setminted{linenos, breaklines}
 \hypersetup{
   colorlinks=true,
   linkcolor=Orchid,
   urlcolor=ProcessBlue
 }
 
-\usemintedstyle{stata-dark}
+\raggedright
 
 \begin{document}
 
-\title[ScottyRank.jl]{ScottyRank.jl: A Julia Implementation of PageRank and HITS}
+\title[ScottyRank.jl]{ScottyRank.jl: An Implementation of PageRank \& HITS}
 
 \author{Siyuan Chen}
 \author{Michael Zhou}
@@ -53,42 +34,251 @@
 \date{November 2021}
 
 \begin{abstract}
-PageRank is an algorithm famously used by Google to determine the relative importance of different websites for search results. More generally, PageRank and variations of the algorithm can be applied to any directed graph of objects, where one wishes to find the most "important" nodes, as determined by a combination of the number of nodes pointing to it and the number of nodes that it points to. In our implementation of PageRank, Markov Matrices simulating a random walk along the edges of a directed graph were used to determine each node's relative importance. At every step, the PageRank score of a given node would be distributed among the nodes that can be reached through a directed edge outward from the starting node. Our implementation of the HITS variation of the PageRank algorithm added "hub" and "authority" scores, which distinguish between nodes pointing to many other nodes (hubs) and nodes with many other nodes pointing to itself (authorities).
-
-In our project, we implemented both the PageRank and HITS algorithms using Julia to better understand the linear algebra insights behind the two algorithms, and tested them on datasets of varying sizes and densities.
-
+  SOME ABSTRACT HERE
 \end{abstract}
 
 \maketitle
 
-%\tableofcontents
+\tableofcontents
 
 \section{Mathematical Background}
 
-\textbf{Markov Matrices and Random Walks}
+\subsection{Linear Algebra}
 
-Markov Matrices and their applications to Random Walks are the foundational linear algebra concepts behind the PageRank algorithm.
+\subsubsection{Definitions}
 
-Markov Matrices are square matrices with strictly non-negative entries where the sum of entries in every column is equal to 1. Markov Matrices have several key properties that make them especially useful for iterative computing-- for a given Markov Matrix $M$, the following are true:
+Positive matrices are defined as matrices with positive entries.
 
+Markov matrices are defined as square matrices with nonnegatives entries and column sum $1$ across all of its columns.
+Note that for a $n\times n$ matrix $M$, the latter condition is equivalent to $M^T\vec{1} = \vec{1}$,
+where $\vec{1}\in\R^n$ has all ones as components.
 
-In our PageRank implementation, our Markov Matrices are not positive (all entries positive) because we are doing random walks, which assume that at every step, there is a 0 probability that our marker stays at the current node.
+Positive Markov matrices are defined as, well, positive Markov matrices.
 
+\subsubsection{Facts}
 
-\clearpage
+(Perron-Frobenius theorem)
+Let $A$ be a positive square matrix.
+Let $\lambda_1$ be $A$'s maximum eigenvalue in terms of absolute values.
+Then $\lambda_1$ is positive and has algebraic (and subsequently geometric) multiplicity $1$.
 
-\section{Algorithms and Computations}
+Let $M$ be a Markov matrix.
+Let $\lambda_1$ be $M$'s maximum eigenvalue in terms of absolute values.
+Then $\lambda_1 = 1$.
+
+Let $M'$ be a positive Markov matrix.
+Let $\lambda_1$ be $M'$'s maximum eigenvalue in terms of absolute values.
+Then $\lambda_1 = 1$ and has algebraic (and subsequently geometric) multiplicity $1$.
+
+\subsubsection{Usage}
+
+Let $M$ be a $n\times n$ Markov matrix.
+Then $M$ specifies a dicrete memoryless transition process between $n$ states, namely the process where
+\[
+  \left(\forall (t, i, j)\in\N\times[n]\times[n]\right)
+  \left[\Pr(\text{state }i\text{ at time }t + 1\mid \text{state }j\text{ at time }t) = M_{ij}\right].
+\]
+
+Let $\vec{v}\in\R^n$ such that $\vec{v}$ has nonnegative components and $\vec{v}^T\vec{1} = 1$ (a stochastic vector).
+Then $\vec{v}$ specifies an (initial) discrete probability distribution over the $n$ states, namely the distribution where
+\[
+  (\forall i\in[n])
+  [\Pr(\text{state }i\text{ at time }0) = \vec{v}_i].
+\]
+
+Then the probability distribution over the $n$ states after $t$ steps of the transition process specified by $M$ is precisely $M^t\vec{v}$,
+or equivalently
+\[
+  (\forall (t, i)\in\N\times[n])
+  \left[\Pr(\text{state }i\text{ at time }t) = \left(M^t\vec{v}\right)_i\right].
+\]
+
+\subsection{Graph Theory}
+
+\subsubsection{Definitions}
+
+A simple directed graph is defined as an unweighted directed graph without self-referential edges or multiple edges
+between the same origin destination pair.
+
+For a simple directed graph with $n$ vertices, the adjacency matrix $\mathcal{A}$ is defined to be
+the $n\times n$ matrix where
+\[
+  (\forall (i, j)\in[n]\times[n])\left(A_{ij} = 
+    \begin{cases}
+      1 & \text{there is an edge to $i$ from $j$} \\
+      0 & \text{otherwise}
+    \end{cases}
+  \right).
+\]
+
+\subsubsection{Facts}
+
+For a simple directed graph with $n$ vertices and its adjacency matrix $\mathcal{A}$,
+\begin{align*}
+  (\forall j\in[n])&
+  \left[\text{number of outgoing neighbors from vertex $j$} = \mathrm{out}(j) = (\mathcal{A}_{*j})^T\vec{1}\right] \\
+  (\forall i\in[n])&
+  \left[\text{number of incoming neighbors to vertex $i$} = \mathrm{in}(i) = (\mathcal{A}_{i*})^T\vec{1}\right].
+\end{align*}
+
+\section{Algorithms}
+
+\subsection{The network model}
+
+Both algorithms, PageRank and HITS, model the network of interest as a simple directed graph with websites as vertices
+and links as edges.
+This implies that there will be no self-referential links, no duplicate links between the same origin
+and destination pair, and no priority difference between links.
+
+\subsection{PageRank}
+
+\subsubsection{The random walk}
+
+PageRank models the behavior of a typical web surfer as a damped random walk.
+
+\begin{enumerate}
+  \item The surfer starts out by visiting a random site out of all sites with equal probability.
+  \item At every step, the surfer has a probability $\lambda$ of continuing surfing and a complementary
+    $1 - \lambda$ probability of losing interest, for a predetermined $\lambda$.
+  
+    \begin{enumerate}
+      \item If the surfer continues \ldots
+
+        \begin{enumerate}
+          \item \ldots and there are links exiting the current site, the surfer
+            clicks on a random link (and visits the site it points to) out of those links with equal probability.
+          \item \ldots and there aren't any links exiting the current site, the surfer simply
+            visits a random site out of all sites with equal probability.
+        \end{enumerate}
+
+      \item If the surfer loses interest, they simply visits a random site out of all sites with equal probability.
+    \end{enumerate}
+
+\end{enumerate}
+
+To best model a typical surfer's probability of continuing surfing, $\lambda$, also known as the damping factor,
+is empirically determined to be around $0.85$.
+
+\subsubsection{Matrix representation}
+
+Let $n$ be the number of websites in the network of interest.
+Let $\mathcal{A}$ be the adjacency matrix for the network of interest.
+Let $\langle\vec{v}_{t}\rangle_{t\in\N}$ be the probability distributions describing the
+website the surfer is visiting at time $t$.
+Let $M$ be the transition matrix for the random walk process.
+
+Then $\vec{v}_0 = \vec{1} / n$,
+$M$ is the $n\times n$ matrix where
+\[
+  (\forall (i, j)\in[n]\times[n])
+  \left[
+  M_{ij} =
+  \begin{cases}
+    \frac{\lambda}{\mathrm{out}(j)} + \frac{1 - \lambda}{n}
+    & \mathcal{A}_{ij} = 1 \\
+    \frac{1 - \lambda}{n}
+    & \mathcal{A}_{ij} = 0\wedge\mathrm{out}(j) > 0 \\
+    \frac{\lambda}{n} + \frac{1 - \lambda}{n}
+    & \mathrm{out}(j) = 0
+  \end{cases}
+  \right],
+\]
+and
+\[
+  (\forall t\in\N)\left(\vec{v}_t = M^t\vec{v}_0\right).
+\]
+
+Note that in this case $M$ is a positive Markov matrix, assuming reasonable $\lambda$.
+
+\subsubsection{Definition}
+
+The PageRank score for a given website in the network of interest is defined as the probabilty of a typical surfer
+visiting that website after an indefinitely long damped random walk.
+In matrix form,
+\[
+  (\forall i\in[n])
+  \left[\mathrm{PageRank}(i) = \lim_{t\to\infty}(\vec{v}_t)_i = \lim_{t\to\infty}\left(M^t\vec{v}_0\right)_i\right].
+\]
+
+Note that the limits exist: convergence is guaranteed as $M$ has a unique maximal eigenvalue of $1$ and thus an steady
+attracting state.
+
+\subsection{HITS}
+
+\subsubsection{Authorities and hubs}
+
+Due to PageRank's algorithmic design, a given website's PageRank score determined mostly by the scores of its
+incoming neighbors.
+Consequently, PageRank tends to underestimate the importance of websites similar to ``web directories'', i.e., those
+with few significant incoming neighbors yet many significant outgoing neighbors.
+
+To address this issue, HITS (Hyperlink-Induced Topic Search) introduces Authority and Hub scores, which measure
+a given website's tendencies to be refered to by others and to refer to others, respectively.
+Note that the two metrics are not ``mutually exclusive''; a website like Wikipedia can have both a high Authority score
+and a high Hub score.
+
+Specifically, Authority and Hub scores are recursively defined: a website's Authority score is determined by
+the Hub scores of its incoming neighbors and its Hub score is determined by the Authority scores of its outgoing
+neighbors.
+
+\subsubsection{Matrix representation}
+
+Let $n$ be the number of websites in the network of interest.
+Let $\mathcal{A}$ be the adjacency matrix for the network of interest.
+Let $\langle\vec{a}_t\rangle_{t\in\N}$ and $\langle\vec{h}_t\rangle_{t\in\N}$ be the (pre-normalization)
+Authority and Hub scores for the $n$ websites at time $t$.
+
+Then $\vec{a}_0 = \vec{h}_0 = \vec{1}$ and
+\[
+  (\forall t\in\N)
+  \left[
+    \left(\vec{a}_{t + 1}, \vec{h}_{t + 1}\right) = \left(\mathcal{A}\vec{h}_t, \mathcal{A}^T\vec{a}_t\right)
+  \right].
+\]
+
+\subsubsection{Definition} The Authority and Hub scores for a given website in the network of interest is defined
+as the respective scores after indefinitely many iterations.
+In matrix form,
+\[
+  (\forall i\in[n])
+  \left[
+    \left(\mathrm{Authority}(i), \mathrm{Hub}(i)\right) =
+    \lim_{t\to\infty}
+    \left((\vec{a}_t)_i, (\vec{h}_t)_i\right)
+  \right].
+\]
+
+To guarantee convergence, the Authority and Hub scores are normalized.
+Our implementation performs normalization after every iteration.
+This means
+\[
+  (\forall t\in\N)
+  \left[
+    \lVert(\vec{a}_t)'\rVert = \lVert(\vec{h}_t)'\rVert = 1
+  \right]
+\]
+where
+\[
+  (\forall t\in\N)
+  \left[
+    (\vec{a}_t)' = \frac{\vec{a}_t}{\lVert\vec{a}_t\rVert}
+    \wedge
+    (\vec{h}_t)' = \frac{\vec{h}_t}{\lVert\vec{h}_t\rVert}
+  \right].
+\]
+
+\section{Implementation}
 
 \subsection{Custom Structs}
 
-We defined the structs Vertex and Graph to be used in our PageRank algorithms. 
-Vertices were defined as structs with an unsigned integer index, a list of indices of vertices that have directed edges pointing towards V, 
-and a list of indices of vertices that V has directed edges pointing towards, 
-as shown in the code segment below. 
+We defined the structs Vertex and Graph to be used in our PageRank algorithms.
+Vertices were defined as structs with an unsigned integer index, a list of indices of vertices that have directed edges pointing towards V,
+and a list of indices of vertices that V has directed edges pointing towards,
+as shown in the code segment below.
 
 For our purposes, we defined a Graph as a struct with the number of vertices and a list of the vertices in the graph sorted by their index.
 
-\begin{minted}[linenos]{julia}
+\begin{minted}{julia}
 export Vertex, Graph
 
 struct Vertex
@@ -109,23 +299,27 @@ The functions \mintinline{julia}/read_graph/, \mintinline{julia}/read_edge_list/
 
 The format for an edge list input file is as follows:
 
-\begin{minted}[linenos,fontsize=\small]{julia}
-<num_vertices> <num_edges>
-# Directed edge from Vertex with index 1 to Vertex with index 2.
-1 2
-# More generally,
-<Index from> <Index to>
-...
-\end{minted}
+FORMAT
+
+% \begin{minted}{julia}
+% <num_vertices> <num_edges>
+% # Directed edge from Vertex with index 1 to Vertex with index 2.
+% 1 2
+% # More generally,
+% <Index from> <Index to>
+% ...
+% \end{minted}
 
 The format for an adjacency list input file is as follows:
 
-\begin{minted}[linenos,fontsize=\small]{julia}
-<num_vertices>
-# Vertices that the first Vertex has directed edges towards
-<Index> <Index> < Index > ...
-...
-\end{minted}
+FORMAT
+
+% \begin{minted}{julia}
+% <num_vertices>
+% # Vertices that the first Vertex has directed edges towards
+% <Index> <Index> < Index > ...
+% ...
+% \end{minted}
 
 \subsection{PageRank}
 
@@ -152,14 +346,14 @@ Otherwise, there should be an equal probability that our surfer goes to any one 
 So for every one of the vertices $V_p$ that the current vertex $V$ points to,
 we add the reciprocal of the number of outgoing neighbors of the current vertex
 ($\frac{1}{\text{\mintinline{julia}/num_out_neighbors/}}$) to the matrix entry representing the probability that we end up at $V_p$ from $V$,
-which is 
+which is
 to represent the the aforementioned idea.
 
 Finally, we apply the damping factor to the matrix.
 Since the damping factor represents the probability that a su$M_{VV_p}$, coded as \mintinline{julia}/M[V_p, V]/,rfer will continue surfing at any given vertex,
 we multiply the PageRank value of every entry in the matrix by the damping factor.
 Then, we must add the value $\frac{1-\text{\mintinline{julia}/damping/}}{\text{\mintinline{julia}/num_vertices/}-1}$ to each entry in the matrix.
-We add the previous fraction because if the surfer stops surfing at a given vertex $V$, 
+We add the previous fraction because if the surfer stops surfing at a given vertex $V$,
 we want to continue calculating PageRank,
 so we assume the surfer picks back up at any vertex.
 Since there are \mintinline{julia}/num_vertices/ vertices,
@@ -167,7 +361,7 @@ and the probability a surfer stops surfing at $V$ is \mintinline{julia}/1-dampin
 we must add $\frac{1-\text{\mintinline{julia}/damping/}}{\text{\mintinline{julia}/num_vertices/}-1}$
 to each entry in the matrix.
 
-\begin{minted}[linenos,fontsize=\small]{julia}
+\begin{minted}{julia}
 function pagerank_matrix(graph::Graph, damping::Float64)
   M = zeros(Float64, (graph.num_vertices, graph.num_vertices))
   for vertex in graph.vertices
@@ -198,11 +392,11 @@ then we apply either the iterative or epsilon method to calculate a resultant ve
 \begin{itemize}[label={}]
 \item \mintinline{julia}/graph/: the user-defined graph
 
-\item \mintinline{julia}/damping/: the damping factor for PageRank. 
+\item \mintinline{julia}/damping/: the damping factor for PageRank.
 This is the assumed probability that a surfer will stop traveling on any given move. Defaulted to 0.85
 
 \item \mintinline{julia}/modeparam/: the mode and the parameters for PageRank.
-Designates the calculation method we will use-- 
+Designates the calculation method we will use--
 either \mintinline{julia}/"iter"/ for the iterative method or \mintinline{julia}/"epsi"/ for the epsilon method.
 
 Iterative: \mintinline{julia}/modeparam = ("iter", num_iterations)/:
@@ -213,19 +407,19 @@ Epsilon: \mintinline{julia}/modeparam = ("epsi", epsilon)/: PageRank until conve
 
 \subsubsection{PageRank - Iterative Method}
 
-The \mintinline{julia}/pagerank_iteration/ function calculates PageRank with the iterative method. 
-We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, 
-where $M$ is our PageRank matrix generated from the graph, 
+The \mintinline{julia}/pagerank_iteration/ function calculates PageRank with the iterative method.
+We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$,
+where $M$ is our PageRank matrix generated from the graph,
 and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/).
 The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
 
-Our result of the iterative method is the vector $M^k (\frac{1}{n}\vec{1})$, 
+Our result of the iterative method is the vector $M^k (\frac{1}{n}\vec{1})$,
 where $k$ is the value passed in as \mintinline{julia}/num_iterations/.
 
-\begin{minted}[linenos,fontsize=\small]{julia}
+\begin{minted}{julia}
 function pagerank_iteration(num_vertices::UInt32,
   M::Matrix{Float64}, num_iterations::UInt32)
-  
+
   M_pwr = Base.power_by_squaring(M, num_iterations)
   M_pwr * (ones(Float64, num_vertices) / num_vertices)
 end
@@ -234,11 +428,11 @@ end
 
  \subsubsection{Pagerank - Epsilon Method}
 
-In the epsilon method of our PageRank calculations (\mintinline{julia}/pagerank_epsilon/), 
-similar to the Iterative method, 
-we start with the expression $M(\frac{1}{n}\vec{1}) = M(\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, 
-where $M$ is our PageRank matrix generated from the graph, 
-and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/). 
+In the epsilon method of our PageRank calculations (\mintinline{julia}/pagerank_epsilon/),
+similar to the Iterative method,
+we start with the expression $M(\frac{1}{n}\vec{1}) = M(\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$,
+where $M$ is our PageRank matrix generated from the graph,
+and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/).
 The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
 
 Next, instead of multiplying $(\frac{1}{n}\vec{1})$ by $M$ a fixed amount of times,
@@ -246,10 +440,10 @@ we continue multiplying the vector by $M$ on the left until the norm of the diff
 and the matrix $M^k(\frac{1}{n}, \frac{1}{n}, ... \frac{1}{n})$ is
 less than the caller-specified limit of epsilon.
 
-\begin{minted}[linenos,fontsize=\small]{julia}
-function pagerank_epsilon(num_vertices::UInt32, 
+\begin{minted}{julia}
+function pagerank_epsilon(num_vertices::UInt32,
   M::Matrix{Float64}, epsilon::Float64)
-  
+
   prev = ones(Float64, num_vertices) / num_vertices
   curr = M * prev
   while norm(prev - curr) > epsilon
@@ -258,7 +452,6 @@ function pagerank_epsilon(num_vertices::UInt32,
   curr
 end
 \end{minted}
-
 
 \subsection{HITS Algorithm}
 
@@ -287,7 +480,7 @@ For each vertex $V$ in the graph, for each of the other vertices $V_f$ that poin
 we set the matrix entry corresponding to the edge from $V_f$ to $V$ to 1.
 This entry is coded as \mintinline{julia}/H[V_f, V]/.
 
-\begin{minted}[linenos,fontsize=\small]{julia}
+\begin{minted}{julia}
 function hits_matrices(graph::Graph)
   A = zeros(Float64, (graph.num_vertices, graph.num_vertices))
   H = zeros(Float64, (graph.num_vertices, graph.num_vertices))
@@ -316,7 +509,7 @@ two resultant vectors containing authority and hub scores, respectively.
 \item \mintinline{julia}/graph/: the user-provided directed graph
 
 \item \mintinline{julia}/modeparam/: the mode and the parameters for HITS.
-Designates the calculation method we will use-- 
+Designates the calculation method we will use--
 either \mintinline{julia}/"iter"/ for the iterative method or \mintinline{julia}/"epsi"/ for the epsilon method.
 
 Iterative: \mintinline{julia}/modeparam = ("iter", num_iterations)/:
@@ -340,10 +533,10 @@ because each component of the resultant vector is the sum of the authority score
 
 So to update the authority and hub scores, at every step we set the updated authority scores to the product of the authority matrix and current hub scores (coded as \mintinline{julia}/A*h/), and the updated hub scores to the product of the hub matrix and the current authority scores (coded as \mintinline{julia}/H*a/).
 
-\begin{minted}[linenos,fontsize=\small]{julia}
-function hits_update(A::Matrix{Float64}, 
+\begin{minted}{julia}
+function hits_update(A::Matrix{Float64},
   H::Matrix{Float64}, a::Vector{Float64}, h::Vector{Float64})
-  
+
   normalize(A * h), normalize(H * a)
 end
 \end{minted}
@@ -360,10 +553,10 @@ We start with the authority and hub scores all set to the ones vector, with \min
 Next, we update the authority and hub vectors, which are \mintinline{julia}/a/ and \mintinline{julia}/h/ respectively,
 using the function \mintinline{julia}/hits_update/ at every step for \mintinline{julia}/num_iterations/ iterations, and return the resulting two vectors of authority and hub scores.
 
-\begin{minted}[linenos,fontsize=\small]{julia}
-function hits_iteration(num_vertices::UInt32, A::Matrix{Float64}, 
+\begin{minted}{julia}
+function hits_iteration(num_vertices::UInt32, A::Matrix{Float64},
   H::Matrix{Float64}, num_iterations::UInt32)
-  
+
   a, h = ones(Float64, num_vertices), ones(Float64, num_vertices)
   for _ in 1:num_iterations
     a, h = hits_update(A, H, a, h)
@@ -390,10 +583,10 @@ the norm between the previous and updated hub scores is also less than epsilon.
 
 Finally, the resulting two vectors of authority and hub scores are returned.
 
-\begin{minted}[linenos,fontsize=\small]{julia}
+\begin{minted}{julia}
 function hits_epsilon(num_vertices::UInt32, A::Matrix{Float64},
   H::Matrix{Float64}, epsilon::Float64)
-  
+
   prev_a, prev_h = ones(Float64, num_vertices), ones(Float64, num_vertices)
   curr_a, curr_h = hits_update(A, H, prev_a, prev_h)
   while norm(prev_a - curr_a) > epsilon || norm(prev_h - curr_h) > epsilon
@@ -469,10 +662,9 @@ The parameters for \mintinline{julia}/hits_print/ are:
 
 \section{Results}
 
-Running this example on one of our test cases, we have 
+Running this example on one of our test cases, we have
 
-
-\includegraphics[h!,scale=2]{small_el-graph.png}
+% \includegraphics[h!,scale=2]{small_el-graph.png}
 %\section{Discussion}
 
 %Obstacles and design choices here
