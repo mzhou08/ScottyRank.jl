@@ -122,8 +122,6 @@ For a simple directed graph with $n$ vertices and its adjacency matrix $\mathcal
   \left[\text{number of incoming neighbors to vertex $i$} = \mathrm{in}(i) = (\mathcal{A}_{i*})^T\vec{1}\right].
 \end{align*}
 
-\clearpage
-
 \section{Algorithms}
 
 \subsection{The network model}
@@ -191,6 +189,8 @@ and
   (\forall t\in\N)\left(\vec{v}_t = M^t\vec{v}_0\right).
 \]
 
+Note that in this case $M$ is a positive Markov matrix, assuming reasonable $\lambda$.
+
 \subsubsection{Definition}
 
 The PageRank score for a given website in the network of interest is defined as the probabilty of a typical surfer
@@ -201,6 +201,17 @@ In matrix form,
   \left[\mathrm{PageRank}(i) = \lim_{t\to\infty}(\vec{v}_t)_i = \lim_{t\to\infty}\left(M^t\vec{v}_0\right)_i\right].
 \]
 
-The actually ranking is produced after sorting the websites by PageRank score from high to low.
+Note that the limits exist: convergence is guaranteed as $M$ has a unique maximal eigenvalue of $1$ and thus an steady
+attracting state.
+
+\subsection{HITS}
+
+\subsubsection{Authorities and hubs}
+
+filler
+
+\subsubsection{Matrix representation}
+
+filler
 
 \end{document}
