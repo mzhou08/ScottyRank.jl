@@ -48,26 +48,47 @@
 
 Positive matrices are defined as matrices with positive entries.
 
-Square matrices are defined as matrices with the same number of columns and rows.
-
 Markov matrices are defined as square matrices with nonnegatives entries and column sum $1$ across all of its columns.
 Note that for a $n\times n$ matrix $M$, the latter condition is equivalent to $M^T\vec{1} = \vec{1}$,
 where $\vec{1}\in\R^n$ has all ones as components.
 
 Positive Markov matrices are defined as, well, positive Markov matrices.
 
-\subsection{Properties}
+\subsection{Facts}
 
-
-(Perron-Frobenius Theorem)
+(Perron-Frobenius theorem)
 Let $A$ be a positive square matrix.
-Then $A$ has an eigenvalue $\lambda_0$ such that all other 
+Let $\lambda_1$ be $A$'s maximum eigenvalue in terms of absolute values.
+Then $\lambda_1$ is positive and has algebraic (and subsequently geometric) multiplicity $1$.
 
+Let $M$ be a Markov matrix.
+Let $\lambda_1$ be $M$'s maximum eigenvalue in terms of absolute values.
+Then $\lambda_1 = 1$.
 
+Let $M'$ be a positive Markov matrix.
+Let $\lambda_1$ be $M'$'s maximum eigenvalue in terms of absolute values.
+Then $\lambda_1 = 1$ and has algebraic (and subsequently geometric) multiplicity $1$.
 
+\subsection{Usage}
 
+Let $M$ be a $n\times n$ Markov matrix.
+Then $M$ specifies a dicrete memoryless transition process between $n$ states, namely the process where
+\[
+  \left(\forall (t, i, j)\in\N\times[n]\times[n]\right)
+  \left[\Pr(\text{state }i\text{ at time }t + 1\mid \text{state }j\text{ at time }t) = M_{ij}\right].
+\]
 
+Let $\vec{v}\in\R^n$ such that $\vec{v}$ has nonnegative components and $\vec{v}^T\vec{1} = 1$ (a stochastic vector).
+Then $\vec{v}$ specifies an (initial) discrete probability distribution over the $n$ states, namely the distribution where
+\[
+  (\forall i\in[n])
+  [\Pr(\text{state }i\text{ at time }0) = \vec{v}_i].
+\]
 
-
+Then
+\[
+  (\forall (k, i)\in\N\times[n])
+  \left[\Pr(\text{state }i\text{ at time }k) = \left(M^k\vec{v}\right)_i\right].
+\]
 
 \end{document}
