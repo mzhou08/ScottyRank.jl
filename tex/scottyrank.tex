@@ -721,8 +721,35 @@ We see that, as expected, vertices B and C have the highest PageRank scores by f
 and E has the highest score of the remaining vertices.
 Additionally, we see the vertices G, H, I, and J share the same lowest PageRank score of 0.0163.
 
+\subsection{HITS on Medium-Sized Graph}
 
+When predicting the results for HITS on the graph, we must recall the concepts behind HITS, namely
+that a vertex pointing to vertices with high authority scores will have a high hub score,
+and that a vertex which has vertices with high hub scores pointing to it will have a high authority score.
 
+With this in mind, we see that vertices B and E should have the highest authority scores
+simply because they have the greatest amount of vertices pointing towards them.
+
+However, since B does not point towards many other authorities, its hub score should be low.
+But E points to B, which is a high authority score vertex, so we should expect 
+the hub score of E to be high.
+
+Similarly, the hub score of C should be relatively high since it points to B, but the authority score of C should be low because B does not have a high hub score.
+
+Finally, we should expect the authority scores of G, H, I, J, and K all to be very low
+because no vertices point towards them,
+but their hub scores to be above average because they point to
+one or both of the highest authority nodes-- B and E.
+
+We run the following commands to apply HITS on the graph.
+
+\begin{minted}{julia}
+$ julia
+julia> using ScottyRank
+julia> G=read_graph("data/medium-el.txt", "el") # the graph is stored as an edge list
+julia> a,h = hits(G) # run HITS on the graph
+julia> hits_print(G, a, h, num_lines=11)
+\end{minted}
 
 %\section{Discussion}
 
