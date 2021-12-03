@@ -787,17 +787,20 @@ Hub Score & Index & Vertex & In & Out\\
 \end{tabular}
 \end{table}
 
-The first column lists the calculated PageRank score and
-the second lists the index of the vertex with that score.
+Like PageRank, the first column lists the calculated
+authority score for the first table and the hub score for the second table.
+The second column lists the index of the vertex with that score.
 The third, titled ``Vertex", is the letter assigned to that vertex (A for index 1, B for index 2, etc.).
 The ``In" column displays the number of inbound edges to the corresponding vertex.
 Similarly, the ``Out" columns displays the number of outbound edges from the corresponding vertex.
 
-%\section{Discussion}
+As predicted, the authority scores of B and E are the highest, with C having a low authority score.
+The vertices G, H, I, J, and K have authority scores of 0 because no vertices point to them.
 
-%Obstacles and design choices here
-
-%\section{Conclusion}
+Additionally, we see that the hub scores were also calculated as predicted--
+the hub score of F was the highest because F pointed towards both B and E,
+the two vertices with the highest authority scores. As justified in our predictions, G, H, I
+have very high hub scores. However, J and K had lower hub scores because they only pointed to one of the main authorities.
 
 \section{Code Appendix}
 
