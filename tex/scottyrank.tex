@@ -3,15 +3,9 @@
 \usepackage[a4paper, margin=1in]{geometry}
 \usepackage{amsmath}
 \usepackage[foot]{amsaddr}
-\usepackage{amssymb}
-\usepackage{amsthm}
 \usepackage{enumitem}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{parskip}
-\usepackage{graphicx}
-\usepackage{tikz}
-\usepackage{listings}
-\usepackage{lipsum}
 \usepackage{esvect}
 \usepackage{minted}
 \usepackage{hyperref}
@@ -19,15 +13,13 @@
 \newcommand{\R}{\ensuremath{\mathbb R}}
 \newcommand{\Z}{\ensuremath{\mathbb Z}}
 \newcommand{\N}{\ensuremath{\mathbb N}}
-\newcommand{\C}{\ensuremath{\mathbb C}}
 
+\setminted{linenos, breaklines}
 \hypersetup{
   colorlinks=true,
   linkcolor=Orchid,
   urlcolor=ProcessBlue
 }
-
-\setminted{linenos, breaklines}
 
 \raggedright
 
@@ -42,6 +34,8 @@
 \date{November 2021}
 
 \maketitle
+
+\tableofcontents
 
 \section{Mathematical Background}
 
@@ -209,12 +203,26 @@ attracting state.
 
 \subsubsection{Authorities and hubs}
 
+Due to PageRank's algorithmic design, a given website's PageRank score determined mostly by the scores of its
+incoming neighbors.
+Consequently, PageRank tends to underestimate the importance of websites similar to ``web directories'', i.e., those
+with few significant incoming neighbors yet many significant outgoing neighbors.
+
+To address this issue, HITS (Hyperlink-Induced Topic Search) introduces Authority and Hub scores, which measure
+a given website's tendencies to be refered to by others and to refer to others, respectively.
+Note that the two metrics are not ``mutually exclusive''; a website like Wikipedia can have both a high Authority score
+and a high Hub score.
+
+Specifically, Authority and Hub scores are recursively defined: a website's Authority score is determined by
+the Hub scores of its incoming neighbors and its Hub score is determined by the Authority scores of its outgoing
+neighbors.
+
 \subsubsection{Matrix representation}
 
 Let $n$ be the number of websites in the network of interest.
 Let $\mathcal{A}$ be the adjacency matrix for the network of interest.
-Let $\langle\vec{a}_t\rangle_{t\in\N}$ and $\langle\vec{h}_t\rangle_{t\in\N}$ be the (pre-normalized) authority and hub
-scores for the $n$ websites at time $t$.
+Let $\langle\vec{a}_t\rangle_{t\in\N}$ and $\langle\vec{h}_t\rangle_{t\in\N}$ be the (pre-normalization)
+Authority and Hub scores for the $n$ websites at time $t$.
 
 Then $\vec{a}_0 = \vec{h}_0 = \vec{1}$ and
 \[
@@ -225,7 +233,7 @@ Then $\vec{a}_0 = \vec{h}_0 = \vec{1}$ and
 \]
 
 \subsubsection{Definition} The Authority and Hub scores for a given website in the network of interest is defined
-as the scores after indefinitely many iterations.
+as the respective scores after indefinitely many iterations.
 In matrix form,
 \[
   (\forall i\in[n])
@@ -236,8 +244,8 @@ In matrix form,
   \right].
 \]
 
-To guarantee convergence, the Authority and Hub scores are usually normalized.
-In our implementation, normalization is performed after every iteration.
+To guarantee convergence, the Authority and Hub scores are normalized.
+Our implementation performs normalization after every iteration.
 This means
 \[
   (\forall t\in\N)
