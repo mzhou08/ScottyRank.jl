@@ -223,7 +223,7 @@ and a high Hub score.
 
 Specifically, Authority and Hub scores are recursively defined: a website's Authority score is determined by
 the Hub scores of its incoming neighbors and its Hub score is determined by the Authority scores of its outgoing
-neighbors.
+neighbors.~\cite{radu_tanase}
 
 \subsubsection{Matrix representation}
 
@@ -551,7 +551,7 @@ found in the Appendix.
 \section{Example}
 
 Shown below is a recreation of the medium-sized network with 11 websites displayed in
-the Wikipedia article on PageRank.
+the Wikipedia article on PageRank.~\cite{wikipedia_2021}
 We will run both PageRank and HITS on this network.
 
 \begin{center}
@@ -676,5 +676,8 @@ Furthermore, we see that the Hub scores are also calculated as predicted:
 the Hub score of F is the highest because F links towards both B and E,
 the two vertices with the highest authority scores. G, H, I also
 have very high Hub scores. However, J and K have lower Hub scores because they only link to one of the main Authorities.
+
+\bibliographystyle{acm}
+\bibliography{refs}
 
 \end{document}
