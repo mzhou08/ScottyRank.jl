@@ -9,6 +9,7 @@
 \usepackage{esvect}
 \usepackage{minted}
 \usepackage{hyperref}
+\usepackage{graphicx}
 
 \newcommand{\R}{\ensuremath{\mathbb R}}
 \newcommand{\Z}{\ensuremath{\mathbb Z}}
@@ -20,6 +21,9 @@
   linkcolor=Orchid,
   urlcolor=ProcessBlue
 }
+
+
+\graphicspath{ {.} }
 
 \raggedright
 
@@ -662,9 +666,65 @@ The parameters for \mintinline{julia}/hits_print/ are:
 
 \section{Results}
 
-Running this example on one of our test cases, we have
 
-% \includegraphics[h!,scale=2]{small_el-graph.png}
+For each graph, we run pagerank print and hits print
+
+We explain why the results are as expected.
+
+
+The below graph is a recreation of the graph found in the Wikipedia article on PageRank:
+
+\includegraphics[width=\textwidth]{Wikipedia_Medium-graph.png}
+
+As shown in the figure, we expect vertices B and C to have the highest PageRank scores
+because virtually every vertices points to it, either directly or through other vertices such as E.
+We also expect E to have a fairly high PageRank score because there are many nodes pointing to it;
+hoever, E points to B but B does not point to E, so E should have a lower PageRank than B.
+Furthermore, we expect the vertices G, H, I, J, and K to have the lowest PageRank scores because
+no vertices point towards them, and they only have edges pointing outwards.
+Their PageRank scores should also be roughly equal since they each have a similar outgoing edge structure,
+only pointing to 1 or 2 other vertices.
+
+We run the following commands to apply PageRank on the graph.
+
+\begin{minted}{julia}
+$ julia
+julia> using ScottyRank
+julia> G=read_graph("data/medium-el.txt", "el") # the graph is stored as an edge list
+julia> pg = pagerank(G) # run PageRank on the graph
+julia> pagerank_print(G, pg, num_lines=11)
+\end{minted}
+
+The printed result for \mintinline{julia}{pagerank_print} is shown below:
+
+\begin{table}[h]
+\begin{tabular}{lllll}
+PageRank Score & Index & Vertex & In & Out\\
+    0.3643 &        2 &         B& 7 &         1 \\
+    0.3638 &         3 &         C& 1 &         1 \\
+    0.0813 &         5 &         E& 6 &         3 \\
+    0.0395 &         4 &         D& 1 &         2 \\
+    0.0395 &         6 &         F& 1 &         2 \\
+    0.0304 &         1 &         A& 1 &         0 \\
+    0.0163 &         9 &         I& 0 &         2 \\
+    0.0163 &        10 &         J& 0 &         1 \\
+    0.0163 &        11 &         K& 0 &         1 \\
+    0.0163 &         7 &         G& 0 &         2 \\
+    0.0163 &         8 &         H& 0 &          2\\
+\end{tabular}
+\end{table}
+
+The first column lists the calculated PageRank score and
+the second lists the index of the vertex with that score.
+The third, titled ``Vertex", is the letter assigned to that vertex (A for index 1, B for index 2, etc.).
+The ``In" column displays the number of inbound edges to the corresponding vertex.
+Similarly, the ``Out" columns displays the number of outbound edges from the corresponding vertex.
+
+We see that, as expected, vertices B and C have the highest PageRank scores by far,
+and E has the highest score of the remaining vertices.
+Additionally, we see the vertices G, H, I, and J share the same lowest PageRank score of 0.0163.
+
+
 %\section{Discussion}
 
 %Obstacles and design choices here
