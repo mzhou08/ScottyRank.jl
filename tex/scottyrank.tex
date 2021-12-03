@@ -11,9 +11,6 @@
 \usepackage{parskip}
 \usepackage{graphicx}
 \usepackage{tikz}
-\usepackage[cmintegrals, cmbraces]{newtxmath}
-\usepackage{ebgaramond-maths}
-\usepackage[T1]{fontenc}
 \usepackage{listings}
 \usepackage{lipsum}
 \usepackage{minted}
@@ -42,6 +39,8 @@
   linkcolor=Orchid,
   urlcolor=ProcessBlue
 }
+
+\usemintedstyle{stata-dark}
 
 \begin{document}
 
@@ -87,7 +86,7 @@ We defined the structs Vertex and Graph to be used in our PageRank algorithms. V
 
 For our purposes, we defined a Graph as a struct with the number of vertices and a list of the vertices in the graph sorted by their index.
 
-\begin{minted}{julia}
+\begin{minted}[linenos]{julia}
 export Vertex, Graph
 
 struct Vertex
@@ -143,14 +142,14 @@ We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, 
 
 Our result of the iterative method is the vector $M^k (\frac{1}{n}\vec{1})$, where $k$ is the value passed in as num\_iterations.
 
-\begin{lstlisting}
+\begin{minted}{julia}
 function pagerank_iteration(num_vertices::UInt32,
   M::Matrix{Float64}, num_iterations::UInt32)
   
   M_pwr = Base.power_by_squaring(M, num_iterations)
   M_pwr * (ones(Float64, num_vertices) / num_vertices)
 end
-\end{lstlisting}
+\end{minted}
 
 
 \item \textbf{Pagerank - Epsilon Variation}
