@@ -16,6 +16,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{listings}
 \usepackage{lipsum}
+\usepackage{minted}
 % \usepackage{microtype}
 % WILL TIDY UP PACKAGES LATER
 
@@ -86,7 +87,7 @@ We defined the structs Vertex and Graph to be used in our PageRank algorithms. V
 
 For our purposes, we defined a Graph as a struct with the number of vertices and a list of the vertices in the graph sorted by their index.
 
-\begin{lstlisting}
+\begin{minted}{julia}
 export Vertex, Graph
 
 struct Vertex
@@ -99,8 +100,7 @@ struct Graph
   num_vertices::UInt32
   vertices::Vector{Vertex} # sorted by index
 end
-\end{lstlisting}
-
+\end{minted}
 
 \textbf{Reading Graphs and Vertices from Files}
 
