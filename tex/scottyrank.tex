@@ -81,7 +81,10 @@ In our PageRank implementation, our Markov Matrices are not positive (all entrie
 
 \subsection{Custom Structs}
 
-We defined the structs Vertex and Graph to be used in our PageRank algorithms. Vertices were defined as structs with an unsigned integer index, a list of indices of vertices that have directed edges pointing towards V, and a list of indices of vertices that V has directed edges pointing towards, as shown in the code segment below. 
+We defined the structs Vertex and Graph to be used in our PageRank algorithms. 
+Vertices were defined as structs with an unsigned integer index, a list of indices of vertices that have directed edges pointing towards V, 
+and a list of indices of vertices that V has directed edges pointing towards, 
+as shown in the code segment below. 
 
 For our purposes, we defined a Graph as a struct with the number of vertices and a list of the vertices in the graph sorted by their index.
 
@@ -100,9 +103,9 @@ struct Graph
 end
 \end{minted}
 
-\subsection{Reading Graphs and Vertices from Files}
+\subsection{Reading Graphs from Files}
 
-The functions read\_graph, read\_edge\_list, and read\_adjacency\_list are used to read and construct graphs from text files.
+The functions \mintinline{julia}/read_graph/, \mintinline{julia}/read_edge_list/, and \mintinline{julia}/read_adjacency_list/ are used to read and construct graphs from text files.
 
 The format for an edge list input file is as follows:
 
@@ -124,21 +127,31 @@ The format for an adjacency list input file is as follows:
 ...
 \end{lstlisting}
 
-\subsection{PageRank Matrix Generation}
+\subsection{PageRank}
 
-The function pagerank\_matrix generates a Markov Matrix that will be used in the PageRank algorith,.
+The function \mintinline{julia}/pagerank/ generates a vector containing the PageRank scores of the
+vertices calculated from the user-provided graph.
 
-\textbf{PageRank General Algorithm}
+\subsubsection{PageRank Matrix Generation}
 
-In our general PageRank algorithm, we will use the PageRank matrix generated from the graph $G$.
+The function \mintinline{julia}/pagerank_matrix/ generates a Markov Matrix that will be used in the PageRank algorithm.
+
+\subsubsection{PageRank General Algorithm}
+
+In our general PageRank algorithm, we will use the PageRank matrix generated from the user-provided graph.
 
 
 
 \subsubsection{PageRank - Iterative Variation}
 
-The first method that we can use to calculate PageRank is the Iterative method. We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, where $M$ is our PageRank matrix generated from the graph, and $n$ is the number of vertices (passed in as num\_vertices). The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
+The first method that we can use to calculate PageRank is the Iterative method. 
+We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, 
+where $M$ is our PageRank matrix generated from the graph, 
+and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/).
+The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
 
-Our result of the iterative method is the vector $M^k (\frac{1}{n}\vec{1})$, where $k$ is the value passed in as num\_iterations.
+Our result of the iterative method is the vector $M^k (\frac{1}{n}\vec{1})$, 
+where $k$ is the value passed in as \mintinline{julia}/num_iterations/.
 
 \begin{minted}{julia}
 function pagerank_iteration(num_vertices::UInt32,
@@ -152,9 +165,17 @@ end
 
  \subsubsection{Pagerank - Epsilon Variation}
 
-In the Epsilon method of our PageRank calculations (pagerank\_epsilon), similar to the Iterative method, we start with the expression $M(\frac{1}{n}\vec{1}) = M(\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, where $M$ is our PageRank matrix generated from the graph, and $n$ is the number of vertices (passed in as num\_vertices). The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
+In the Epsilon method of our PageRank calculations (\mintinline{julia}/pagerank_epsilon/), 
+similar to the Iterative method, 
+we start with the expression $M(\frac{1}{n}\vec{1}) = M(\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, 
+where $M$ is our PageRank matrix generated from the graph, 
+and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/). 
+The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
 
-Next, instead of multiplying $(\frac{1}{n}\vec{1})$ by $M$ a fixed amount of times, we continue multiplying the vector by $M$ on the left until the norm of the difference between the vector $M^{k+1}(1/n, 1/n, ... 1/n)$ and the matrix $M^k(\frac{1}{n}, \frac{1}{n}, ... \frac{1}{n})$ is less than the caller-specified limit of Epsilon.
+Next, instead of multiplying $(\frac{1}{n}\vec{1})$ by $M$ a fixed amount of times,
+we continue multiplying the vector by $M$ on the left until the norm of the difference between the vector $M^{k+1}(1/n, 1/n, ... 1/n)$
+and the matrix $M^k(\frac{1}{n}, \frac{1}{n}, ... \frac{1}{n})$ is
+less than the caller-specified limit of Epsilon.
 
 \begin{lstlisting}
 function pagerank_epsilon(num_vertices::UInt32, 
@@ -172,12 +193,14 @@ end
 
 \subsection{HITS General Algorithm}
 
-The HITS algorithm is another algorithm that serves a similar purpose as PageRank, but provides more insight into the relationships between vertices in the directed graph. HITS assigns "hub" and "authority" scores to each of the vertices in the graph.
+The HITS algorithm is another algorithm that serves a similar purpose as PageRank,
+but provides more insight into the relationships between vertices in the directed graph.
+HITS assigns "hub" and "authority" scores to each of the vertices in the graph.
 
 
 \subsection{Output}
 
-For PageRank, the function print\_pagerank prints the Vertices with the top PageRank scores to standard output.
+For PageRank, the function \mintinline{julia}/print_pagerank/ prints the Vertices with the top PageRank scores to standard output.
 
 %\section{Results}
 
