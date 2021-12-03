@@ -666,15 +666,12 @@ The parameters for \mintinline{julia}/hits_print/ are:
 
 \section{Results}
 
-
-For each graph, we run pagerank print and hits print
-
-We explain why the results are as expected.
-
-
-The below graph is a recreation of the graph found in the Wikipedia article on PageRank:
+The below graph is a recreation of the medium-sized graph with 11 vertices
+found in the Wikipedia article on PageRank:
 
 \includegraphics[width=\textwidth]{Wikipedia_Medium-graph.png}
+
+\subsection{PageRank on Medium-Sized Graph}
 
 As shown in the figure, we expect vertices B and C to have the highest PageRank scores
 because virtually every vertices points to it, either directly or through other vertices such as E.
@@ -723,6 +720,8 @@ Similarly, the ``Out" columns displays the number of outbound edges from the cor
 We see that, as expected, vertices B and C have the highest PageRank scores by far,
 and E has the highest score of the remaining vertices.
 Additionally, we see the vertices G, H, I, and J share the same lowest PageRank score of 0.0163.
+
+
 
 
 %\section{Discussion}
