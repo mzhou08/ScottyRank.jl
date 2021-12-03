@@ -269,17 +269,15 @@ where
 
 \section{Implementation}
 
-\subsection{Custom Structs}
+\subsection{Structs}
 
-We defined the structs Vertex and Graph to be used in our PageRank algorithms.
-Vertices were defined as structs with an unsigned integer index, a list of indices of vertices that have directed edges pointing towards V,
-and a list of indices of vertices that V has directed edges pointing towards,
-as shown in the code segment below.
+We define two structs, \mintinline{julia}{Vertex} and \mintinline{julia}{Graph}, to represent
+the vertices and the graph itself in our simple directed graph model for the network of interest.
 
-For our purposes, we defined a Graph as a struct with the number of vertices and a list of the vertices in the graph sorted by their index.
+Note that to align with Julia conventions, we use 1-based indexing.
 
 \begin{minted}{julia}
-export Vertex, Graph
+# export Vertex, Graph
 
 struct Vertex
   index::UInt32
@@ -289,37 +287,51 @@ end
 
 struct Graph
   num_vertices::UInt32
-  vertices::Vector{Vertex} # sorted by index
+  vertices::Vector{Vertex}
 end
 \end{minted}
 
-\subsection{Reading Graphs from Files}
+\subsection{Input}
 
-The functions \mintinline{julia}/read_graph/, \mintinline{julia}/read_edge_list/, and \mintinline{julia}/read_adjacency_list/ are used to read and construct graphs from text files.
+We define three functions,
+\mintinline{julia}{read_graph}, \mintinline{julia}{read_edge_list}, and \mintinline{julia}{read_adjacency_list},
+to read and construct graphs from text files.
+We expose \mintinline{julia}{read_graph} to the client with the option to specify the type of the input file and
+whether or not the input file uses 0-based indexing.
 
-The format for an edge list input file is as follows:
+Edge list files follow the following format:
 
-FORMAT
+\begin{minted}{julia}
+[num_nodes] [num_edges]
+[index_from] [index_to] # repeats [num_edges] times
+...                     # in total
+\end{minted}
 
-% \begin{minted}{julia}
-% <num_vertices> <num_edges>
-% # Directed edge from Vertex with index 1 to Vertex with index 2.
-% 1 2
-% # More generally,
-% <Index from> <Index to>
-% ...
-% \end{minted}
+Adjacency list files follow the following format:
 
-The format for an adjacency list input file is as follows:
+\begin{minted}{julia}
+[num_nodes]
+[index_to_1] [index_to_2] ... [index_to_m] # repeats [num_nodes] times
+...                                        # in total
+\end{minted}
 
-FORMAT
+The code for \mintinline{julia}{read_edge_list} and \mintinline{julia}{read_adjacency_list} can be found in the
+Appendix.
 
-% \begin{minted}{julia}
-% <num_vertices>
-% # Vertices that the first Vertex has directed edges towards
-% <Index> <Index> < Index > ...
-% ...
-% \end{minted}
+\begin{minted}{julia}
+# export read_graph
+
+function read_graph(filepath::String;
+    filetype::String="el", zero_index::Bool=false)
+  if filetype == "el"
+    read_edge_list(filepath, zero_index)
+  elseif filetype == "al"
+    read_adjacency_list(filepath, zero_index)
+  else
+    error("invalid filetype")
+  end
+end
+\end{minted}
 
 \subsection{PageRank}
 
