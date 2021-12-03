@@ -191,7 +191,7 @@ end
 
 In our general PageRank algorithm \mintinline{julia}/pagerank/,
 we first generate a PageRank Markov Matrix from the user-provided graph,
-then we apply either the iterative or epsilon method to calculate a resultant matrix simulating the results of a continued random walk.
+then we apply either the iterative or epsilon method to calculate a resultant vector with the PageRank scores, simulating the results of a continued random walk.
 
 \mintinline{julia}/pagerank/ takes in the following parameters:
 
@@ -202,7 +202,8 @@ then we apply either the iterative or epsilon method to calculate a resultant ma
 This is the assumed probability that a surfer will stop traveling on any given move. Defaulted to 0.85
 
 \item \mintinline{julia}/modeparam/: the mode and the parameters for PageRank.
-Designates the calculation method we will use-- either \mintinline{julia}/"iter"/ for the iterative method or \mintinline{julia}/"epsi"/ for the epsilon method.
+Designates the calculation method we will use-- 
+either \mintinline{julia}/"iter"/ for the iterative method or \mintinline{julia}/"epsi"/ for the epsilon method.
 
 Iterative: \mintinline{julia}/modeparam = ("iter", num_iterations)/:
 PageRank for a given number of iterations
@@ -211,7 +212,7 @@ Epsilon: \mintinline{julia}/modeparam = ("epsi", epsilon)/: PageRank until conve
 
 \subsubsection{PageRank - Iterative Method}
 
-The first method that we can use to calculate PageRank is the iterative method. 
+The \mintinline{julia}/pagerank_iteration/ function calculates PageRank with the iterative method. 
 We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, 
 where $M$ is our PageRank matrix generated from the graph, 
 and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/).
@@ -264,6 +265,71 @@ The HITS algorithm serves a similar purpose as PageRank,
 but provides more insight into the relationships between vertices in the directed graph.
 HITS assigns "hub" and "authority" scores to each of the vertices in the graph.
 
+A vertex $V$ has a high authority score if many other vertices point towards it,
+and a high hub score if it points towards many vertices with high authority scores.
+
+\subsubsection{HITS Matrix Pair Generation}
+
+The function \mintinline{julia}/hits_matrices/ generates two matrices \mintinline{julia}/A/ and \mintinline{julia}/H/
+that are the authority and hub matrices, respectively.
+
+We generate these matrices, which resemble adjacency matrices, by iterating through all of the vertices.
+
+\begin{minted}{julia}
+function hits_matrices(graph::Graph)
+  A = zeros(Float64, (graph.num_vertices, graph.num_vertices))
+  H = zeros(Float64, (graph.num_vertices, graph.num_vertices))
+  for vertex in graph.vertices
+    for index_to in vertex.out_neighbors
+      A[index_to, vertex.index] = 1
+    end
+    for index_from in vertex.in_neighbors
+      H[index_from, vertex.index] = 1
+    end
+  end
+  A, H
+end
+\end{minted}
+
+\subsubsection{HITS General Algorithm}
+
+The function \mintinline{julia}/hits/ first finds the initial authority and hub HITS matrices
+for the user-provided graph,
+then applies either the iterative or the epsilon method to calculate
+two resultant vectors containing authority and hub scores, respectively.
+
+\mintinline{julia}/hits/ takes the following parameters:
+
+\begin{itemize}[label={}]
+\item \mintinline{julia}/graph/: the user-provided directed graph
+
+\item \mintinline{julia}/modeparam/: the mode and the parameters for HITS.
+Designates the calculation method we will use-- 
+either \mintinline{julia}/"iter"/ for the iterative method or \mintinline{julia}/"epsi"/ for the epsilon method.
+
+Iterative: \mintinline{julia}/modeparam = ("iter", num_iterations)/:
+HITS for a given number of iterations
+Epsilon: \mintinline{julia}/modeparam = ("epsi", epsilon)/: HITS until convergence of
+both Hub and Authority vectors with epsilon
+\end{itemize}
+
+\subsubsection{HITS - Iterative Method}
+
+The \mintinline{julia}/hits_iteration/ function calculates HITS with the iterative method. 
+We start with the matrix $M$ and the vector $\frac{1}{n}\vec{1} = (\frac{1}{n}, \frac{1}{n}, \cdots \frac{1}{n})$, 
+where $M$ is our PageRank matrix generated from the graph, 
+and $n$ is the number of vertices (passed in as \mintinline{julia}/num_vertices/).
+The ones vector has $n$ components, and similarly the Markov matrix $M$ is $n\times n$.
+
+Our result of the iterative method is the vector $M^k (\frac{1}{n}\vec{1})$, 
+where $k$ is the value passed in as \mintinline{julia}/num_iterations/.
+
+\begin{minted}{julia}
+=
+\end{minted}
+
+
+\subsubsection{HITS - Epsilon Method}
 
 \subsection{Output}
 
@@ -278,5 +344,9 @@ For PageRank, the function \mintinline{julia}/print_pagerank/ prints the Vertice
 %Obstacles and design choices here
 
 %\section{Conclusion}
+
+\section{Code Appendix}
+
+ADD AT END
 
 \end{document}
