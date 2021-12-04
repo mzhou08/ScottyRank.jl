@@ -2,6 +2,5 @@ Session.vim
 tex/*
 !tex/scottyrank.tex
 !tex/scottyrank.pdf
-!tex/*.png
 !tex/refs.bib
 .DS_Store
