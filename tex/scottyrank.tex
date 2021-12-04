@@ -8,6 +8,7 @@
 \usepackage{parskip}
 \usepackage{esvect}
 \usepackage{url}
+\usepackage{tikz}
 \usepackage{graphicx}
 \usepackage{minted}
 \usepackage{hyperref}
@@ -568,17 +569,47 @@ Shown below is a recreation of the medium-sized network with 11 websites display
 the Wikipedia article on PageRank.~\cite{pagerank}\cite{snap}
 We will run both PageRank and HITS on this network.
 
-\begin{center}
-  \includegraphics[scale = 0.4]{wikipedia.png}
-\end{center}
-
+\begin{center}\begin{tikzpicture}[thick,
+  big/.style = {draw=orange!60, fill=orange!40, circle, very thick, minimum size=40mm},
+  medium/.style = {draw=teal!60, fill=teal!40, circle, thick, minimum size=20mm},
+  small/.style = {draw=violet!60, fill=violet!40, circle, minimum size=10mm}
+  ]
+  \node[medium] (1) {$A$};
+  \node[big] (2) at (3.5, 0) {$B$};
+  \node[big] (3) at (8.5, 0) {$C$};
+  \node[medium] (4) at (0, -3.5) {$D$};
+  \node[medium] (5) at (5.5, -4.5) {$E$};
+  \node[medium] (6) at (9, -3.5) {$F$};
+  \node[small] (7) at (0.5, -7) {$G$};
+  \node[small] (8) at (2, -7.5) {$H$};
+  \node[small] (9) at (3.5, -8) {$I$};
+  \node[small] (10) at (6.5, -7.5) {$J$};
+  \node[small] (11) at (8, -6.5) {$K$};
+  \draw[->] (2) to [bend right=10] (3);
+  \draw[->] (3) to [bend right=10] (2);
+  \draw[->] (4) -- (1);
+  \draw[->] (4) -- (2);
+  \draw[->] (5) -- (2);
+  \draw[->] (5) -- (4);
+  \draw[->] (5) to [bend right=10] (6);
+  \draw[->] (6) -- (2);
+  \draw[->] (6) to [bend right=10] (5);
+  \draw[->] (7) -- (2);
+  \draw[->] (7) -- (5);
+  \draw[->] (8) -- (2);
+  \draw[->] (8) -- (5);
+  \draw[->] (9) -- (2);
+  \draw[->] (9) -- (5);
+  \draw[->] (10) -- (5);
+  \draw[->] (11) -- (5);
+\end{tikzpicture}\end{center}
 
 \subsection{PageRank}
 
 \subsubsection{Expectations}
 
-We expect websites B and C to have the highest PageRank scores
-because virtually every website links to it, either directly or through other websites such as E.
+We expect websites B and C to have the highest PageRank scores because virtually every website links to it,
+either directly or through other websites such as E.
 
 We also expect E to have a fairly high PageRank score because there are many websites linking to it.
 
