@@ -2,4 +2,4 @@
 
 ![ScottyRank Logo](img/scottyrank-logo.png)
 
-<a href="tex/scottyrank.pdf" class="image fit"><img src="img/scottyrank-logo.png" alt=""></a>
+<embed src="tex/scottyrank.pdf" width="500" height="375" type="application/pdf">
