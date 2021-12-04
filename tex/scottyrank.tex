@@ -7,6 +7,7 @@
 \usepackage[dvipsnames]{xcolor}
 \usepackage{parskip}
 \usepackage{esvect}
+\usepackage{url}
 \usepackage{graphicx}
 \usepackage{minted}
 \usepackage{hyperref}
@@ -19,7 +20,7 @@
 \setminted{linenos, breaklines}
 \hypersetup{
   colorlinks=true,
-  linkcolor=Orchid,
+  linkcolor=RoyalPurple,
   urlcolor=ProcessBlue
 }
 
@@ -36,12 +37,20 @@
 \date{November 2021}
 
 \begin{abstract}
-  SOME ABSTRACT HERE
+PageRank is an algorithm famously used by Google to determine the relative importance of different websites for search results.
+More generally, PageRank and variations of the algorithm can be applied to any directed graph of objects, where one wishes to find the most ``important'' nodes, as determined by a combination of the number of nodes pointing to it and the number of nodes that it points to.
+In our implementation of PageRank, Markov Matrices simulating a random walk along the edges of a directed graph were used to determine each node's relative importance.
+At every step, the PageRank score of a given node would be distributed among the nodes that can be reached through a directed edge outward from the starting node.
+Our implementation of the HITS variation of the PageRank algorithm added "hub" and "authority" scores, which distinguish between nodes pointing to many other nodes (hubs) and nodes with many other nodes pointing to itself (authorities).
+
+In our project, we implemented both the PageRank and HITS algorithms using Julia to better understand the linear algebra insights behind the two algorithms, and tested them on datasets of varying sizes and densities.
 \end{abstract}
 
 \maketitle
 
 \tableofcontents
+
+\clearpage
 
 \section{Background}
 
@@ -62,11 +71,11 @@ Positive Markov matrices are defined as, well, positive Markov matrices.
 (Perron-Frobenius theorem)
 Let $A$ be a positive square matrix.
 Let $\lambda_1$ be $A$'s maximum eigenvalue in terms of absolute values.
-Then $\lambda_1$ is positive and has algebraic (and subsequently geometric) multiplicity $1$.
+Then $\lambda_1$ is positive and has algebraic (and subsequently geometric) multiplicity $1$.~\cite{perron}
 
 Let $M$ be a Markov matrix.
 Let $\lambda_1$ be $M$'s maximum eigenvalue in terms of absolute values.
-Then $\lambda_1 = 1$.
+Then $\lambda_1 = 1$.~\cite{strang}
 
 Let $M'$ be a positive Markov matrix.
 Let $\lambda_1$ be $M'$'s maximum eigenvalue in terms of absolute values.
@@ -136,7 +145,7 @@ and destination pair, and no priority difference between links.
 
 \subsubsection{The random walk}
 
-PageRank models the behavior of a typical web surfer as a damped random walk.
+PageRank models the behavior of a typical web surfer as a damped random walk.~\cite{pagerank}
 
 \begin{enumerate}
   \item The surfer starts out by visiting a random site out of all sites with equal probability.
@@ -223,7 +232,7 @@ and a high Hub score.
 
 Specifically, Authority and Hub scores are recursively defined: a website's Authority score is determined by
 the Hub scores of its incoming neighbors and its Hub score is determined by the Authority scores of its outgoing
-neighbors.~\cite{radu_tanase}
+neighbors.~\cite{hits}~\cite{tanase}
 
 \subsubsection{Matrix representation}
 
@@ -278,7 +287,7 @@ where
 We define two structs, \mintinline{julia}{Vertex} and \mintinline{julia}{Graph}, to represent
 the vertices and the graph itself in our simple directed graph model for the network of interest.
 
-Note that to align with Julia conventions, we use 1-based indexing.
+Note that to align with Julia conventions, we use 1-based indexing.~\cite{julialang}
 
 \begin{minted}{julia}
 # export Vertex, Graph
@@ -551,7 +560,7 @@ found in the Appendix.
 \section{Example}
 
 Shown below is a recreation of the medium-sized network with 11 websites displayed in
-the Wikipedia article on PageRank.~\cite{wikipedia_2021}
+the Wikipedia article on PageRank.~\cite{pagerank}\cite{snap}
 We will run both PageRank and HITS on this network.
 
 \begin{center}
@@ -679,5 +688,16 @@ have very high Hub scores. However, J and K have lower Hub scores because they o
 
 \bibliographystyle{acm}
 \bibliography{refs}
+
+\appendix
+
+\section{Links}
+
+The project repository can be found at
+\href{https://github.com/mzhou08/ScottyRank.jl}{https://github.com/mzhou08/ScottyRank.jl}.
+
+\section{Code}
+
+\inputminted{julia}{../src/ScottyRank.jl}
 
 \end{document}
