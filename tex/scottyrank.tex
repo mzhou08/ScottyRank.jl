@@ -20,8 +20,9 @@
 \setminted{linenos, breaklines}
 \hypersetup{
   colorlinks=true,
+  citecolor=BurntOrange,
   linkcolor=RoyalPurple,
-  urlcolor=ProcessBlue
+  urlcolor=MidnightBlue
 }
 
 \raggedright
@@ -37,13 +38,17 @@
 \date{November 2021}
 
 \begin{abstract}
-PageRank is an algorithm famously used by Google to determine the relative importance of different websites for search results.
-More generally, PageRank and variations of the algorithm can be applied to any directed graph of objects, where one wishes to find the most ``important'' nodes, as determined by a combination of the number of nodes pointing to it and the number of nodes that it points to.
-In our implementation of PageRank, Markov Matrices simulating a random walk along the edges of a directed graph were used to determine each node's relative importance.
-At every step, the PageRank score of a given node would be distributed among the nodes that can be reached through a directed edge outward from the starting node.
-Our implementation of the HITS variation of the PageRank algorithm added "hub" and "authority" scores, which distinguish between nodes pointing to many other nodes (hubs) and nodes with many other nodes pointing to itself (authorities).
+We present \href{https://github.com/mzhou08/ScottyRank.jl}{ScottyRank.jl},
+a Julia implementation of the PageRank algorithm and one of its successors, the HITS algorithm.
+Famously used by Google, PageRank, as well as its variations,
+models a network of interest (such as the Internet) as a simple directed graph and produces relative rankings
+of the vertices that roughly translate to the vertices’ levels of relevance and importance.
 
-In our project, we implemented both the PageRank and HITS algorithms using Julia to better understand the linear algebra insights behind the two algorithms, and tested them on datasets of varying sizes and densities.
+In this paper, we first introduced the mathematical background for the two algorithms.
+We then outlined the core algorithmic insights of both PageRank and HITS and expressed them in matrix form.
+Using code segments, we presented our implementation of the two algorithms.
+Finally, we ran the two algorithms on the Wikipedia PageRank network and analyzed the outputs.~\cite{pagerank}
+We included the source code in the Appendix.
 \end{abstract}
 
 \maketitle
