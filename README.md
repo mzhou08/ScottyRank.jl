@@ -1,5 +1,5 @@
-# ScottyRank.jl: Julia implementation for PageRank and HITS
-
-Term project for 21-241 Matrices and Linear Transformations
+# ScottyRank.jl: An Implementation of PageRank & HITS
 
 ![ScottyRank Logo](img/scottyrank-logo.png)
+
+<a href="tex/scottyrank.pdf" class="image fit"><img src="img/scottyrank-logo.png" alt=""></a>
