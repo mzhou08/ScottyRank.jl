@@ -21,9 +21,9 @@
 \setminted{linenos, breaklines}
 \hypersetup{
   colorlinks=true,
-  citecolor=BurntOrange,
-  linkcolor=Rhodamine,
-  urlcolor=MidnightBlue
+  citecolor=Thistle,
+  linkcolor=MidnightBlue,
+  urlcolor=BurntOrange
 }
 
 \raggedright
@@ -39,8 +39,10 @@
 \date{November 2021}
 
 \begin{abstract}
+
 We present \href{https://github.com/mzhou08/ScottyRank.jl}{ScottyRank.jl},
 a Julia implementation of the PageRank algorithm and one of its successors, the HITS algorithm.
+
 Famously used by Google, PageRank, as well as its variations,
 models a network of interest (such as the Internet) as a simple directed graph and produces relative rankings
 of the vertices that roughly translate to the vertices’ levels of relevance and importance.
@@ -50,6 +52,10 @@ We then outlined the core algorithmic insights of both PageRank and HITS and exp
 Using code segments, we presented our implementation of the two algorithms.
 Finally, we ran the two algorithms on the Wikipedia PageRank network and analyzed the outputs.~\cite{pagerank}
 We included the source code in the Appendix.
+
+\begin{center}
+  \includegraphics[scale=0.15]{../img/scottyrank-bare.png}
+\end{center}
 \end{abstract}
 
 \maketitle
@@ -660,7 +666,7 @@ websites linking to websites with high Authority scores will have high Hub score
 With this in mind, we expect that websites B and E to have the highest Authority scores
 simply because they have the greatest number of websites linking to them.
 
-However, since B does not link towards many other Authorities, its Hub score should be low.
+However, since B does not link towards many other authorities, its Hub score should be low.
 But E links to B, which has a high Authority score, so we expect the Hub score of E to be above average.
 
 Similarly, the Hub score of C should be relatively high since it links to B, but the Authority score of
@@ -720,7 +726,7 @@ The vertices G, H, I, J, and K have Authority scores of 0 because no vertices po
 Furthermore, we see that the Hub scores are also calculated as predicted:
 the Hub score of F is the highest because F links towards both B and E,
 the two vertices with the highest authority scores. G, H, I also
-have very high Hub scores. However, J and K have lower Hub scores because they only link to one of the main Authorities.
+have very high Hub scores. However, J and K have lower Hub scores because they only link to one of the main authorities.
 
 \bibliographystyle{acm}
 \bibliography{refs}
