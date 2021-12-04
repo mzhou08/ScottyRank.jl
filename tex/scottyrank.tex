@@ -21,7 +21,7 @@
 \hypersetup{
   colorlinks=true,
   citecolor=BurntOrange,
-  linkcolor=RoyalPurple,
+  linkcolor=Rhodamine,
   urlcolor=MidnightBlue
 }
 
@@ -554,15 +554,15 @@ The code for \mintinline{julia}{hits_print} can be found in the Appendix.
 \subsection{Output}
 
 We offer two ways of exporting the \mintinline{julia}{graph} struct: \mintinline{julia}{generate_adjacency_matrix}
-and \mintinline{julia}{generate_adjacency_list}.
-
-\mintinline{julia}{generate_adjacency_matrix}, well, generates the \mintinline{julia}{graph}'s adjacency matrix,
-with the option to specify whether the desired output should use 0-based indexing.
+and \mintinline{julia}{generate_adjacency_list}, which, well, generate the \mintinline{julia}{graph}'s
+adjacency matrix and adjacency list, respectively.
 
 The code for \mintinline{julia}{generate_adjacency_matrix} and \mintinline{julia}{generate_adjacency_list} and be
 found in the Appendix.
 
 \section{Example}
+
+\subsection{The Wikipedia PageRank graph}
 
 Shown below is a recreation of the medium-sized network with 11 websites displayed in
 the Wikipedia article on PageRank.~\cite{pagerank}\cite{snap}
@@ -699,7 +699,7 @@ have very high Hub scores. However, J and K have lower Hub scores because they o
 \section{Links}
 
 The project repository can be found at
-\href{https://github.com/mzhou08/ScottyRank.jl}{https://github.com/mzhou08/ScottyRank.jl}.
+\href{https://github.com/mzhou08/ScottyRank.jl}{\texttt{https://github.com/mzhou08/ScottyRank.jl}}.
 
 \section{Code}
 
