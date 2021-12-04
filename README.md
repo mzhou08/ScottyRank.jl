@@ -1,5 +1,7 @@
 # ScottyRank.jl: An Implementation of PageRank & HITS
 
-![ScottyRank Logo](img/scottyrank-logo.png)
+Click on one of the vertices below to access the pdf.
 
-<object data="tex/scottyrank.pdf" width="1000" height="1000" type='application/pdf'></object>
+<a href="tex/scottyrank.pdf" class="image fit">
+  <img src="img/scottyrank-logo.png" alt="ScottyRank.jl">
+</a>
